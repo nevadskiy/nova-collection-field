@@ -41,7 +41,7 @@
                     @click="() => createItem()"
                 >
                     <Icon type="plus-circle" />
-                    <span class="font-bold">{{ __('Create item') }}</span>
+                    <span class="font-bold">{{ __('Create :resource', { resource: field.resource.singularLabel }) }}</span>
                 </BasicButton>
             </div>
         </template>
