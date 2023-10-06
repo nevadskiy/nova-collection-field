@@ -1,13 +1,16 @@
 {
-    "name": "nevadskiy/collection-field",
-    "description": "A Laravel Nova field.",
+    "name": "nevadskiy/nova-collection-field",
+    "description": "Collection fields for Laravel Nova.",
     "keywords": [
         "laravel",
-        "nova"
+        "nova",
+        "collection",
+        "field",
+        "morph-to-many"
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0"
+        "php": "^8.0"
     },
     "autoload": {
         "psr-4": {
