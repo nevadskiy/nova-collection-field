@@ -88,27 +88,28 @@ const toggleCollapse = function () {
     collapsed.value = !collapsed.value
 }
 
-for (const field of props.fields) {
-    field._original = field.attribute
-}
-
-const buildAttribute = function (field) {
-    const attribute = `${props.attribute}[attributes][${field._original}`
-
-    if (! attribute.endsWith(']')) {
-        return `${attribute}]`
-    }
-
-    return attribute
-}
-
-watch(() => props.attribute, function () {
-    for (const field of props.fields) {
-        field.attribute = buildAttribute(field)
-    }
-}, {
-    immediate: true
-})
+// @todo replace using MockFormData that transform attributes
+// for (const field of props.fields) {
+//     field._original = field.attribute
+// }
+//
+// const buildAttribute = function (field) {
+//     const attribute = `${props.attribute}[attributes][${field._original}`
+//
+//     if (! attribute.endsWith(']')) {
+//         return `${attribute}]`
+//     }
+//
+//     return attribute
+// }
+//
+// watch(() => props.attribute, function () {
+//     for (const field of props.fields) {
+//         field.attribute = buildAttribute(field)
+//     }
+// }, {
+//     immediate: true
+// })
 
 const fill = function (formData) {
     formData.append(`${props.attribute}[id]`, props.id ?? '')
