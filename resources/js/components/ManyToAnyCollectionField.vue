@@ -28,9 +28,7 @@
                     @move-up="moveUpItem(index)"
                     @move-down="moveDownItem(index)"
                     @remove="removeItem(index)"
-                >
-                    {{ item }}
-                </CollectionItem>
+                />
             </template>
 
             <p v-else class="text-center">
