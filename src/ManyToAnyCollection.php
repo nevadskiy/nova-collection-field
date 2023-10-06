@@ -38,9 +38,9 @@ class ManyToAnyCollection extends Field
         return $this;
     }
 
-    public function sortByPivot(string $field): static
+    public function sortByPivot(string $pivot): static
     {
-        $this->sortByPivot = $field;
+        $this->sortByPivot = $pivot;
 
         return $this;
     }
@@ -123,7 +123,7 @@ class ManyToAnyCollection extends Field
             });
     }
 
-    public function useStrategy($strategy): static
+    public function useStrategy(Strategy $strategy): static
     {
         $this->strategy = $strategy;
 
