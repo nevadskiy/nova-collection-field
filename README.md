@@ -11,39 +11,6 @@
 
 Usage example for a `Page` model that has defined [Many-To-Many (Polymorphic)](https://laravel.com/docs/10.x/eloquent-relationships#many-to-many-polymorphic-relations) relations. 
 
-`Page` model:
-
-```php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-
-class Page extends Model
-{
-    public function heroSections(): MorphToMany
-    {
-        return $this->morphedByMany(HeroSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
-    }
-
-    public function demoSections(): MorphToMany
-    {
-        return $this->morphedByMany(DemoSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
-    }
-
-    public function faqSections(): MorphToMany
-    {
-        return $this->morphedByMany(FaqSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
-    }
-}
-```
-
 `Page` resource:
 
 ```php
@@ -78,6 +45,39 @@ class Page extends Resource
                 ->stacked()
                 ->fullWidth(),
         ];
+    }
+}
+```
+
+`Page` model:
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+
+class Page extends Model
+{
+    public function heroSections(): MorphToMany
+    {
+        return $this->morphedByMany(HeroSection::class, 'page_section')
+            ->withPivot('position')
+            ->withTimestamps();
+    }
+
+    public function demoSections(): MorphToMany
+    {
+        return $this->morphedByMany(DemoSection::class, 'page_section')
+            ->withPivot('position')
+            ->withTimestamps();
+    }
+
+    public function faqSections(): MorphToMany
+    {
+        return $this->morphedByMany(FaqSection::class, 'page_section')
+            ->withPivot('position')
+            ->withTimestamps();
     }
 }
 ```
