@@ -112,7 +112,11 @@ watch(() => props.attribute, function () {
 
 const fill = function (formData) {
     formData.append(`${props.attribute}[id]`, props.id ?? '')
-    formData.append(`${props.attribute}[type]`, props.type)
+
+    if (props.type) {
+        formData.append(`${props.attribute}[type]`, props.type)
+    }
+
     formData.append(`${props.attribute}[mode]`, props.mode)
 
     for (const field of (props.fields ?? [])) {
