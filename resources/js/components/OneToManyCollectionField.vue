@@ -16,7 +16,6 @@
                     :errors="errors"
                     :resource-id="item.id"
                     :resource-name="field.resource.type"
-                    :attribute="`${field.attribute}[${index}]`"
                     :index="index"
                     :id="item.id"
                     :mode="item.mode"
@@ -53,6 +52,7 @@ import { FormField, HandlesValidationErrors } from 'laravel-nova'
 import clone from 'lodash/clone'
 import uniqueId from 'lodash/uniqueId'
 import CollectionItem from "./CollectionItem.vue";
+import {PathFormData} from "../path-form-data";
 
 export default {
     mixins: [
@@ -89,9 +89,13 @@ export default {
                 return;
             }
 
-            for (const itemComponent of this.$refs.itemComponents) {
-                itemComponent.fill(formData)
-            }
+            const pathFormData = PathFormData.decorate(formData)
+
+            pathFormData.withAppendingAttribute(this.field.attribute, () => {
+                for (const itemComponent of this.$refs.itemComponents) {
+                    itemComponent.fill(pathFormData)
+                }
+            })
         },
 
         createItem() {

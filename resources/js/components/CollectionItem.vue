@@ -58,14 +58,14 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps([
     'fields',
     'errors',
     'resourceName',
     'resourceId',
-    'attribute',
+    'path',
     'index',
     'id',
     'type',
@@ -88,41 +88,22 @@ const toggleCollapse = function () {
     collapsed.value = !collapsed.value
 }
 
-// @todo replace using MockFormData that transform attributes
-// for (const field of props.fields) {
-//     field._original = field.attribute
-// }
-//
-// const buildAttribute = function (field) {
-//     const attribute = `${props.attribute}[attributes][${field._original}`
-//
-//     if (! attribute.endsWith(']')) {
-//         return `${attribute}]`
-//     }
-//
-//     return attribute
-// }
-//
-// watch(() => props.attribute, function () {
-//     for (const field of props.fields) {
-//         field.attribute = buildAttribute(field)
-//     }
-// }, {
-//     immediate: true
-// })
+const fill = function (pathFormData) {
+    pathFormData.withAppendingAttribute(props.index, () => {
+        pathFormData.append('id', props.id ?? '')
 
-const fill = function (formData) {
-    formData.append(`${props.attribute}[id]`, props.id ?? '')
+        if (props.type) {
+            pathFormData.append('type', props.type)
+        }
 
-    if (props.type) {
-        formData.append(`${props.attribute}[type]`, props.type)
-    }
+        pathFormData.append('mode', props.mode)
 
-    formData.append(`${props.attribute}[mode]`, props.mode)
-
-    for (const field of (props.fields ?? [])) {
-        field.fill(formData)
-    }
+        pathFormData.withAppendingAttribute('attributes', () => {
+            for (const field of (props.fields ?? [])) {
+                field.fill(pathFormData)
+            }
+        })
+    })
 }
 
 defineExpose({
