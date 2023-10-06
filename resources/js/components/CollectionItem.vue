@@ -73,7 +73,7 @@ const props = defineProps([
     'title',
     'collapsable',
     'collapsedByDefault',
-    'sortable'
+    'sortable',
 ])
 
 const emits = defineEmits([

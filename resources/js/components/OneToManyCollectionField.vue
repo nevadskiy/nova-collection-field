@@ -14,8 +14,8 @@
                     :field="field"
                     :fields="item.fields"
                     :errors="errors"
-                    :resource-id="resourceId"
-                    :resource-name="resourceName"
+                    :resource-id="item.id"
+                    :resource-name="field.resource.type"
                     :attribute="`${field.attribute}[${index}]`"
                     :index="index"
                     :id="item.id"
@@ -96,7 +96,8 @@ export default {
 
         createItem() {
             this.collection.push({
-                id: this.generateUniqueId(),
+                uid: this.generateUniqueId(),
+                id: null,
                 mode: 'create',
                 singularLabel: this.field.resource.singularLabel,
                 fields: clone(this.field.resource.fields),
