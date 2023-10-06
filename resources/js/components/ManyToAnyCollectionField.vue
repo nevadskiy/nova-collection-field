@@ -6,7 +6,7 @@
         :full-width-content="fullWidthContent"
     >
         <template #field>
-            <template v-if="collection.length > 0">
+            <div v-if="collection.length > 0" class="space-y-4">
                 <CollectionItem
                     v-for="(item, index) in collection"
                     :key="item.uid"
@@ -29,7 +29,7 @@
                     @move-down="moveDownItem(index)"
                     @remove="removeItem(index)"
                 />
-            </template>
+            </div>
 
             <p v-else class="text-center">
                 {{ __('Collection is empty') }}
