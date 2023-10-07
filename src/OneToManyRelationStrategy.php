@@ -45,14 +45,14 @@ class OneToManyRelationStrategy implements Strategy
         return function () use ($request, $requestAttribute, $model, $attribute) {
             $collection = $request->all()[$requestAttribute] ?? [];
 
-            $collectionIdsMap = collect($collection)
+            $collectionById = collect($collection)
                 ->filter(fn ($resource) => $resource['id'])
                 ->keyBy('id');
 
-            $relationModelsByKeys = $model->{$attribute}()->get()->getDictionary();
+            $relationModelsByKey = $model->{$attribute}()->get()->getDictionary();
 
-            foreach ($relationModelsByKeys as $relationModel) {
-                if (! isset($collectionIdsMap[$relationModel->getKey()])) {
+            foreach ($relationModelsByKey as $relationModel) {
+                if (! isset($collectionById[$relationModel->getKey()])) {
                     $relationModel->delete();
                 }
             }
@@ -61,7 +61,7 @@ class OneToManyRelationStrategy implements Strategy
                 if ($resource['mode'] === 'create') {
                     $this->createResourceModel($model->{$attribute}()->make(), $this->field->resourceClass, $resource['attributes'], $index);
                 } else if ($resource['mode'] === 'update') {
-                    $this->updateResourceModel($relationModelsByKeys[$resource['id']], $this->field->resourceClass, $resource['attributes'], $index);
+                    $this->updateResourceModel($relationModelsByKey[$resource['id']], $this->field->resourceClass, $resource['attributes'], $index);
                 }
             }
         };
