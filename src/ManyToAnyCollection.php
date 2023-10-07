@@ -25,10 +25,10 @@ class ManyToAnyCollection extends Field
     {
         parent::__construct($name, $attribute);
 
+        $this->useStrategy(new ManyToAnyRelationStrategy());
+
         $this->showOnIndex = false;
         $this->showOnDetail = false;
-
-        $this->useStrategy(new ManyToAnyRelationStrategy());
     }
 
     public function resources(array $resources): static
