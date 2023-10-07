@@ -66,7 +66,7 @@ class ManyToAnyCollection extends Field
     {
         return array_merge(parent::jsonSerialize(), [
             'resources' => $this->serializeResources(),
-            'sortBy' => $this->sortByPivot,
+            'sortable' => ! is_null($this->sortByPivot),
             'attachable' => $this->attachable,
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,
