@@ -13,8 +13,6 @@
 `FaqSection` resource:
 
 ```php
-<?php
-
 namespace App\Nova;
 
 use App\Models\FaqSection as FaqSectionModel;
