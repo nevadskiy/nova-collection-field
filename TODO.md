@@ -15,3 +15,4 @@
 - [ ] indicator for existing resources (when already saved in database)
 - [ ] fix preview for markdown field inside collection item resource
 - [ ] fix file uploads inside collection item resource
+- [ ] handle resource authorization (authorizedToCreate, authorizedToDelete, authorizedToUpdate)
