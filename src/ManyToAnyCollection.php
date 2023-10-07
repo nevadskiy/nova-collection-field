@@ -15,7 +15,7 @@ class ManyToAnyCollection extends Field
 
     public array $resources = [];
 
-    public string|null $sortByPivot = null;
+    public ?string $sortByPivot = null;
 
     public bool $attachable = false;
 
