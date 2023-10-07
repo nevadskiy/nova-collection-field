@@ -5,6 +5,7 @@ namespace Nevadskiy\Nova\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Resource;
 
 class OneToManyRelationStrategy implements Strategy
 {
@@ -17,7 +18,24 @@ class OneToManyRelationStrategy implements Strategy
 
     public function get(Model $model, string $attribute): array
     {
-        // TODO: Implement get() method.
+        $request = resolve(NovaRequest::class);
+
+        $collection = $model->{$attribute}()->get()
+            ->map(function (Model $model) {
+                return new $this->field->resourceClass($model);
+            });
+
+        // @todo sorting.
+
+        return $collection->map(function (Resource $resource) use ($request) {
+            return [
+                'id' => $resource->getKey(),
+                'singularLabel' => $resource::singularLabel(),
+                'fields' => $resource->updateFields($request)->values()->all(),
+            ];
+        })
+            ->values()
+            ->all();
     }
 
     public function set(NovaRequest $request, $requestAttribute, $model, $attribute): callable
@@ -25,15 +43,17 @@ class OneToManyRelationStrategy implements Strategy
         return function () use ($request, $requestAttribute, $model, $attribute) {
             $collection = $request->all()[$requestAttribute] ?? [];
 
-            dd($collection);
-
-            // @todo handle deletes.
+            $collectionIdsMap = collect($collection)
+                ->filter(fn ($resource) => $resource['id'])
+                ->keyBy('id');
 
             $relationModelsByKeys = $model->{$attribute}()->get()->getDictionary();
 
-//            $diff = $relationModelsByKeys->diff(
-//                collect($collection)->map(fn (array $resource) => $resource['id'])->filter()
-//            );
+            foreach ($relationModelsByKeys as $relationModel) {
+                if (! isset($collectionIdsMap[$relationModel->getKey()])) {
+                    $relationModel->delete();
+                }
+            }
 
             foreach ($collection as $resource) {
                 if ($resource['mode'] === 'create') {

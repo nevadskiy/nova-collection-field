@@ -28,6 +28,11 @@ class OneToManyCollection extends Field
         $this->showOnDetail = false;
     }
 
+    protected function resolveAttribute($resource, $attribute)
+    {
+        return $this->strategy->get($resource, $attribute);
+    }
+
     protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute)
     {
         return $this->strategy->set($request, $requestAttribute, $model, $attribute);
