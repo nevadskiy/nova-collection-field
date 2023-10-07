@@ -14,13 +14,23 @@ class OneToManyCollection extends Field
 
     public string $resourceClass;
 
+    public Strategy $strategy;
+
     public function __construct(string $name, string $relation, string $resourceClass)
     {
         parent::__construct($name, $relation);
 
         $this->resourceClass = $resourceClass;
+
+        $this->useStrategy(new OneToManyRelationStrategy());
+
         $this->showOnIndex = false;
         $this->showOnDetail = false;
+    }
+
+    protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute)
+    {
+        return $this->strategy->set($request, $requestAttribute, $model, $attribute);
     }
 
     public function jsonSerialize(): array
@@ -44,5 +54,16 @@ class OneToManyCollection extends Field
             'singularLabel' => $resource::singularLabel(),
             'fields' => $resource->creationFields($request)->values()->all(),
         ];
+    }
+
+    public function useStrategy(Strategy $strategy): static
+    {
+        $this->strategy = $strategy;
+
+        if (method_exists($strategy, 'setField')) {
+            $strategy->setField($this);
+        }
+
+        return $this;
     }
 }
