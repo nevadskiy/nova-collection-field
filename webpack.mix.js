@@ -6,4 +6,4 @@ mix
   .setPublicPath('dist')
   .js('resources/js/index.js', 'js')
   .vue({ version: 3 })
-  .nova('nevadskiy/collection-field')
+  .nova('nevadskiy/nova-collection-field')
