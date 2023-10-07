@@ -64,13 +64,13 @@ class ManyToAnyCollection extends Field
 
     public function jsonSerialize(): array
     {
-        return array_merge([
+        return array_merge(parent::jsonSerialize(), [
             'resources' => $this->serializeResources(),
             'sortBy' => $this->sortByPivot,
             'attachable' => $this->attachable,
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,
-        ], parent::jsonSerialize());
+        ]);
     }
 
     protected function serializeResources(): array

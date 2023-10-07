@@ -25,11 +25,11 @@ class OneToManyCollection extends Field
 
     public function jsonSerialize(): array
     {
-        return array_merge([
+        return array_merge(parent::jsonSerialize(), [
             'resource' => $this->serializeResource(),
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,
-        ], parent::jsonSerialize());
+        ]);
     }
 
     protected function serializeResource(): array
