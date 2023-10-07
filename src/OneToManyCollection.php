@@ -14,6 +14,8 @@ class OneToManyCollection extends Field
 
     public string $resourceClass;
 
+    public ?string $sortBy = null;
+
     public Strategy $strategy;
 
     public function __construct(string $name, string $relation, string $resourceClass)
@@ -26,6 +28,13 @@ class OneToManyCollection extends Field
 
         $this->showOnIndex = false;
         $this->showOnDetail = false;
+    }
+
+    public function sortBy(string $attribute): static
+    {
+        $this->sortBy = $attribute;
+
+        return $this;
     }
 
     protected function resolveAttribute($resource, $attribute)
@@ -42,6 +51,7 @@ class OneToManyCollection extends Field
     {
         return array_merge(parent::jsonSerialize(), [
             'resource' => $this->serializeResource(),
+            'sortable' => (bool) $this->sortBy,
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,
         ]);

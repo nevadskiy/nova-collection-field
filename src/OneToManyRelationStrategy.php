@@ -5,7 +5,6 @@ namespace Nevadskiy\Nova\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Resource;
 
 class OneToManyRelationStrategy implements Strategy
 {
@@ -20,14 +19,17 @@ class OneToManyRelationStrategy implements Strategy
     {
         $request = resolve(NovaRequest::class);
 
-        $collection = $model->{$attribute}()->get()
-            ->map(function (Model $model) {
-                return new $this->field->resourceClass($model);
+        $collection = $model->{$attribute}()->get();
+
+        if ($this->field->sortBy) {
+            $collection = $collection->sortBy(function (Model $model) {
+                return $model->getAttribute($this->field->sortBy);
             });
+        }
 
-        // @todo sorting.
+        return $collection->map(function (Model $model) use ($request) {
+            $resource = new $this->field->resourceClass($model);
 
-        return $collection->map(function (Resource $resource) use ($request) {
             return [
                 'id' => $resource->getKey(),
                 'singularLabel' => $resource::singularLabel(),
@@ -55,22 +57,21 @@ class OneToManyRelationStrategy implements Strategy
                 }
             }
 
-            foreach ($collection as $resource) {
+            foreach ($collection as $index => $resource) {
                 if ($resource['mode'] === 'create') {
-                    $this->createResourceModel($model->{$attribute}()->make(), $this->field->resourceClass, $resource['attributes']);
+                    $this->createResourceModel($model->{$attribute}()->make(), $this->field->resourceClass, $resource['attributes'], $index);
                 } else if ($resource['mode'] === 'update') {
-                    $this->updateResourceModel($relationModelsByKeys[$resource['id']], $this->field->resourceClass, $resource['attributes']);
+                    $this->updateResourceModel($relationModelsByKeys[$resource['id']], $this->field->resourceClass, $resource['attributes'], $index);
                 }
             }
         };
     }
 
-    protected function createResourceModel(Model $model, string $resourceClass, array $attributes): Model
+    protected function createResourceModel(Model $model, string $resourceClass, array $attributes, int $index): Model
     {
         [$model, $callbacks] = $resourceClass::fill($this->newRequestFromAttributes($attributes), $model);
 
-        // @todo handle this.
-        $model->position = 0;
+        $this->fillSortableAttribute($model, $index);
 
         $model->save();
 
@@ -81,17 +82,23 @@ class OneToManyRelationStrategy implements Strategy
         return $model;
     }
 
-    protected function updateResourceModel(Model $model, string $resourceClass, array $attributes): void
+    protected function updateResourceModel(Model $model, string $resourceClass, array $attributes, int $index): void
     {
         [$model, $callbacks] = $resourceClass::fillForUpdate($this->newRequestFromAttributes($attributes), $model);
 
-        // @todo handle this.
-        $model->position = 0;
+        $this->fillSortableAttribute($model, $index);
 
         $model->save();
 
         foreach ($callbacks as $callback) {
             $callback();
+        }
+    }
+
+    protected function fillSortableAttribute(Model $model, int $index): void
+    {
+        if ($this->field->sortBy) {
+            $model->setAttribute($this->field->sortBy, $index);
         }
     }
 
