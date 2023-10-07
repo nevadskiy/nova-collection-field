@@ -49,10 +49,10 @@
 
 <script>
 import { FormField, HandlesValidationErrors } from 'laravel-nova'
-import clone from 'lodash/clone'
+import cloneDeep from 'lodash/cloneDeep'
 import uniqueId from 'lodash/uniqueId'
-import CollectionItem from "./CollectionItem.vue";
-import {PathFormData} from "../path-form-data";
+import CollectionItem from "./CollectionItem.vue"
+import { PathFormData } from '../path-form-data'
 
 export default {
     mixins: [
@@ -99,12 +99,14 @@ export default {
         },
 
         createItem() {
+            const clone = cloneDeep(this.field.resource)
+
             this.collection.push({
                 uid: this.generateUniqueId(),
                 id: null,
                 mode: 'create',
-                singularLabel: this.field.resource.singularLabel,
-                fields: clone(this.field.resource.fields),
+                singularLabel: clone.singularLabel,
+                fields: clone.fields,
             })
         },
 

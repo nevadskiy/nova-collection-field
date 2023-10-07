@@ -99,7 +99,7 @@
 
 <script>
 import { FormField, HandlesValidationErrors } from 'laravel-nova'
-import clone from 'lodash/clone'
+import cloneDeep from 'lodash/cloneDeep'
 import uniqueId from 'lodash/uniqueId'
 import CollectionItem from "./CollectionItem.vue";
 import SelectAttachableResourceModal from "./SelectAttachableResourceModal.vue";
@@ -166,13 +166,15 @@ export default {
         },
 
         addResourceItem(resource) {
+            const clone = cloneDeep(resource)
+
             this.collection.push({
                 uid: this.generateUniqueId(),
                 id: null,
-                type: resource.type,
+                type: clone.type,
                 mode: 'create',
-                singularLabel: resource.singularLabel,
-                fields: clone(resource.fields),
+                singularLabel: clone.singularLabel,
+                fields: clone.fields,
             })
         },
 
@@ -205,13 +207,15 @@ export default {
         },
 
         attachResourceItem(resource) {
+            const clone = cloneDeep(resource)
+
             this.collection.push({
                 uid: this.generateUniqueId(),
-                id: resource.id,
-                type: resource.type,
+                id: clone.id,
+                type: clone.type,
                 mode: 'attach',
-                singularLabel: resource.singularLabel,
-                fields: clone(resource.fields),
+                singularLabel: clone.singularLabel,
+                fields: clone.fields,
             })
 
             this.closeAttachingResourceModal()
