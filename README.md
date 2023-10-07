@@ -2,12 +2,70 @@
 
 ## Available fields
 
-- [ ] OneToManyCollection
+- [x] OneToManyCollection
 - [ ] ManyToManyCollection
-- [ ] OneToAnyCollection
 - [x] ManyToAnyCollection
 
 ## Usage
+
+### OneToManyCollection
+
+`FaqSection` resource:
+
+```php
+namespace App\Nova;
+
+use App\Models\FaqSection as FaqSectionModel;
+use App\Nova\Resource;
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Http\Requests\NovaRequest;
+use Nevadskiy\Nova\Collection\OneToManyCollection;
+
+class FaqSection extends Resource
+{
+    public static string $model = FaqSectionModel::class;
+
+    public static $title = 'heading';
+
+    public static $search = [
+        'heading',
+    ];
+
+    public function fields(NovaRequest $request): array
+    {
+        return [
+            ID::make(),
+
+            Text::make('Heading'),
+
+            OneToManyCollection::make('Questions', 'items', FaqItem::class)
+                ->sortBy('position')
+                ->stacked()
+                ->fullWidth()
+        ];
+    }
+}
+```
+
+`FaqSection` model:
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class FaqSection extends Model
+{
+    public function items(): HasMany
+    {
+        return $this->hasMany(FaqItem::class);
+    }
+}
+```
+
+### ManyToAnyCollection
 
 Usage example for a `Page` model that has defined [Many-To-Many (Polymorphic)](https://laravel.com/docs/10.x/eloquent-relationships#many-to-many-polymorphic-relations) relations. 
 
@@ -81,19 +139,3 @@ class Page extends Model
     }
 }
 ```
-
-## Todo List
-
-- [ ] validation
-- [ ] detail view
-- [ ] file uploads
-- [ ] json persistence strategy
-- [ ] pivot fields
-- [ ] duplicated attachments (see ManyToManyCreationRules trait)
-- [ ] lock resources for updates
-- [ ] duplicate action
-- [ ] dependent field
-- [ ] remove confirmation dialog
-- [ ] draggable sorting
-- [ ] min / max limit
-- [ ] indicator for existing resources (when already saved in database)

@@ -64,7 +64,8 @@ class ManyToAnyRelationStrategy implements Strategy
 
                 foreach ($resourceCollection as $resource) {
                     $resourceModelsByKey = $resourceClass::newModel()
-                        ->findMany(collect($resourceCollection)->map(fn (array $resource) => $resource['id']))
+                        ->newQuery()
+                        ->findMany(collect($resourceCollection)->map(fn (array $resource) => $resource['id'])->filter())
                         ->getDictionary();
 
                     if ($resource['mode'] === 'create') {

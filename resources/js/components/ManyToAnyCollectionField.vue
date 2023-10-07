@@ -6,7 +6,7 @@
         :full-width-content="fullWidthContent"
     >
         <template #field>
-            <template v-if="collection.length > 0">
+            <div v-if="collection.length > 0" class="space-y-4">
                 <CollectionItem
                     v-for="(item, index) in collection"
                     :key="item.uid"
@@ -14,9 +14,8 @@
                     :field="field"
                     :fields="item.fields"
                     :errors="errors"
-                    :resource-id="resourceId"
-                    :resource-name="resourceName"
-                    :attribute="`${field.attribute}[${index}]`"
+                    :resource-id="item.id"
+                    :resource-name="item.type"
                     :index="index"
                     :id="item.id"
                     :type="item.type"
@@ -24,14 +23,12 @@
                     :title="item.singularLabel"
                     :collapsable="field.collapsable"
                     :collapsed-by-default="field.collapsedByDefault"
-                    :sortable="!!field.sortBy"
+                    :sortable="field.sortable"
                     @move-up="moveUpItem(index)"
                     @move-down="moveDownItem(index)"
                     @remove="removeItem(index)"
-                >
-                    {{ item }}
-                </CollectionItem>
-            </template>
+                />
+            </div>
 
             <p v-else class="text-center">
                 {{ __('Collection is empty') }}
@@ -102,10 +99,11 @@
 
 <script>
 import { FormField, HandlesValidationErrors } from 'laravel-nova'
-import clone from 'lodash/clone'
+import cloneDeep from 'lodash/cloneDeep'
 import uniqueId from 'lodash/uniqueId'
 import CollectionItem from "./CollectionItem.vue";
 import SelectAttachableResourceModal from "./SelectAttachableResourceModal.vue";
+import {PathFormData} from "../path-form-data";
 
 export default {
     mixins: [
@@ -158,19 +156,25 @@ export default {
                 return;
             }
 
-            for (const itemComponent of this.$refs.itemComponents) {
-                itemComponent.fill(formData)
-            }
+            const pathFormData = PathFormData.decorate(formData)
+
+            pathFormData.withAppendingAttribute(this.field.attribute, () => {
+                for (const itemComponent of this.$refs.itemComponents) {
+                    itemComponent.fill(pathFormData)
+                }
+            })
         },
 
         addResourceItem(resource) {
+            const clone = cloneDeep(resource)
+
             this.collection.push({
                 uid: this.generateUniqueId(),
                 id: null,
-                type: resource.type,
+                type: clone.type,
                 mode: 'create',
-                singularLabel: resource.singularLabel,
-                fields: clone(resource.fields),
+                singularLabel: clone.singularLabel,
+                fields: clone.fields,
             })
         },
 
@@ -203,13 +207,15 @@ export default {
         },
 
         attachResourceItem(resource) {
+            const clone = cloneDeep(resource)
+
             this.collection.push({
                 uid: this.generateUniqueId(),
-                id: resource.id,
-                type: resource.type,
+                id: clone.id,
+                type: clone.type,
                 mode: 'attach',
-                singularLabel: resource.singularLabel,
-                fields: clone(resource.fields),
+                singularLabel: clone.singularLabel,
+                fields: clone.fields,
             })
 
             this.closeAttachingResourceModal()

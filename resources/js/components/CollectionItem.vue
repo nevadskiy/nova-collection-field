@@ -58,14 +58,14 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps([
     'fields',
     'errors',
     'resourceName',
     'resourceId',
-    'attribute',
+    'path',
     'index',
     'id',
     'type',
@@ -73,7 +73,7 @@ const props = defineProps([
     'title',
     'collapsable',
     'collapsedByDefault',
-    'sortable'
+    'sortable',
 ])
 
 const emits = defineEmits([
@@ -88,36 +88,22 @@ const toggleCollapse = function () {
     collapsed.value = !collapsed.value
 }
 
-for (const field of props.fields) {
-    field._original = field.attribute
-}
+const fill = function (pathFormData) {
+    pathFormData.withAppendingAttribute(props.index, () => {
+        pathFormData.append('id', props.id ?? '')
 
-const buildAttribute = function (field) {
-    const attribute = `${props.attribute}[attributes][${field._original}`
+        if (props.type) {
+            pathFormData.append('type', props.type)
+        }
 
-    if (! attribute.endsWith(']')) {
-        return `${attribute}]`
-    }
+        pathFormData.append('mode', props.mode)
 
-    return attribute
-}
-
-watch(() => props.attribute, function () {
-    for (const field of props.fields) {
-        field.attribute = buildAttribute(field)
-    }
-}, {
-    immediate: true
-})
-
-const fill = function (formData) {
-    formData.append(`${props.attribute}[id]`, props.id ?? '')
-    formData.append(`${props.attribute}[type]`, props.type)
-    formData.append(`${props.attribute}[mode]`, props.mode)
-
-    for (const field of (props.fields ?? [])) {
-        field.fill(formData)
-    }
+        pathFormData.withAppendingAttribute('attributes', () => {
+            for (const field of (props.fields ?? [])) {
+                field.fill(pathFormData)
+            }
+        })
+    })
 }
 
 defineExpose({

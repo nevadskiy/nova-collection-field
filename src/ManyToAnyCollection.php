@@ -15,7 +15,7 @@ class ManyToAnyCollection extends Field
 
     public array $resources = [];
 
-    public string|null $sortByPivot = null;
+    public ?string $sortByPivot = null;
 
     public bool $attachable = false;
 
@@ -25,10 +25,10 @@ class ManyToAnyCollection extends Field
     {
         parent::__construct($name, $attribute);
 
+        $this->useStrategy(new ManyToAnyRelationStrategy());
+
         $this->showOnIndex = false;
         $this->showOnDetail = false;
-
-        $this->useStrategy(new ManyToAnyRelationStrategy());
     }
 
     public function resources(array $resources): static
@@ -64,13 +64,13 @@ class ManyToAnyCollection extends Field
 
     public function jsonSerialize(): array
     {
-        return array_merge([
+        return array_merge(parent::jsonSerialize(), [
             'resources' => $this->serializeResources(),
-            'sortBy' => $this->sortByPivot,
+            'sortable' => ! is_null($this->sortByPivot),
             'attachable' => $this->attachable,
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,
-        ], parent::jsonSerialize());
+        ]);
     }
 
     protected function serializeResources(): array
