@@ -22,7 +22,7 @@
                     :title="item.singularLabel"
                     :collapsable="field.collapsable"
                     :collapsed-by-default="field.collapsedByDefault"
-                    :sortable="!!field.sortBy"
+                    :sortable="field.sortable"
                     @move-up="moveUpItem(index)"
                     @move-down="moveDownItem(index)"
                     @remove="removeItem(index)"
@@ -79,8 +79,9 @@ export default {
     methods: {
         setInitialValue() {
             this.value = (this.field.value ?? []).map(item => ({
-                ...item,
+                uid: this.generateUniqueId(),
                 mode: 'update',
+                ...item,
             }))
         },
 
