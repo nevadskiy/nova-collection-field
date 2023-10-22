@@ -51,7 +51,7 @@ class OneToManyCollection extends Field
     {
         return array_merge(parent::jsonSerialize(), [
             'resource' => $this->serializeResource(),
-            'sortable' => (bool) $this->sortBy,
+            'sortable' => ! is_null($this->sortBy),
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,
         ]);
