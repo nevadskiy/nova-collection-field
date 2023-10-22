@@ -7,11 +7,11 @@ use Illuminate\Http\UploadedFile;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Resource;
 
-class ManyToAnyRelationStrategy implements Strategy
+class MorphToManyRelationStrategy implements Strategy
 {
-    protected ManyToAnyCollection $field;
+    protected MorphToManyCollection $field;
 
-    public function setField(ManyToAnyCollection $field): void
+    public function setField(MorphToManyCollection $field): void
     {
         $this->field = $field;
     }
@@ -20,7 +20,7 @@ class ManyToAnyRelationStrategy implements Strategy
     {
         $collection = collect();
 
-        foreach ($this->field->resources as $resourceClass => $relation) {
+        foreach ($this->field->resources as $relation => $resourceClass) {
             $collection = $collection->concat(
                 $model->{$relation}()->get()->map(function (Model $model) use ($resourceClass) {
                     return new $resourceClass($model);
@@ -57,7 +57,7 @@ class ManyToAnyRelationStrategy implements Strategy
                 ]))
                 ->groupBy('type');
 
-            foreach ($this->field->resources as $resourceClass => $relation) {
+            foreach ($this->field->resources as $relation => $resourceClass) {
                 $resourceCollection = $collectionByType[$resourceClass::uriKey()] ?? [];
 
                 $syncPayload = [];

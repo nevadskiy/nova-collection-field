@@ -1,11 +1,5 @@
 # Collection fields for Laravel Nova
 
-## Available fields
-
-- [x] OneToManyCollection
-- [ ] ManyToManyCollection
-- [x] ManyToAnyCollection
-
 ## Usage
 
 ### OneToManyCollection
@@ -78,7 +72,7 @@ use App\Models\Page as PageModel;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Nevadskiy\Nova\Collection\ManyToAnyCollection;
+use Nevadskiy\Nova\Collection\MorphToManyCollection;
 
 class Page extends Resource
 {
@@ -91,11 +85,11 @@ class Page extends Resource
 
             Text::make('Title'),
 
-            ManyToAnyCollection::make('Sections')
+            MorphToManyCollection::make('Sections')
                 ->resources([
-                    HeroSection::class => 'heroSections',
-                    DemoSection::class => 'demoSections',
-                    FaqSection::class => 'faqSections',
+                    'heroSections' => HeroSection::class,
+                    'demoSections' => DemoSection::class,
+                    'faqSections' => FaqSection::class,
                 ])
                 ->sortByPivot('position')
                 ->attachable()

@@ -7,7 +7,7 @@ use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Resource;
 
-class ManyToAnyCollection extends Field
+class MorphToManyCollection extends Field
 {
     use Collapsable;
 
@@ -25,7 +25,7 @@ class ManyToAnyCollection extends Field
     {
         parent::__construct($name, $attribute);
 
-        $this->useStrategy(new ManyToAnyRelationStrategy());
+        $this->useStrategy(new MorphToManyRelationStrategy());
 
         $this->showOnIndex = false;
         $this->showOnDetail = false;
@@ -79,7 +79,7 @@ class ManyToAnyCollection extends Field
 
         $resources = [];
 
-        foreach ($this->resources as $resourceClass => $relation) {
+        foreach ($this->resources as $resourceClass) {
             $resources[] = $this->serializeResource(new $resourceClass($resourceClass::newModel()), $request);
         }
 
@@ -101,7 +101,7 @@ class ManyToAnyCollection extends Field
      */
     public function paginateAttachableResources(NovaRequest $request, string $resourceName, int $perPage = 25)
     {
-        $resourceClass = collect($this->resources)->keys()->firstOrFail(function ($resourceClass) use ($resourceName) {
+        $resourceClass = collect($this->resources)->firstOrFail(function ($resourceClass) use ($resourceName) {
             return $resourceClass::uriKey() === $resourceName;
         });
 
