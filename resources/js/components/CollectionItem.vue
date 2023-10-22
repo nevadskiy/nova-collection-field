@@ -88,19 +88,19 @@ const toggleCollapse = function () {
     collapsed.value = !collapsed.value
 }
 
-const fill = function (pathFormData) {
-    pathFormData.withAppendingAttribute(props.index, () => {
-        pathFormData.append('id', props.id ?? '')
+const fill = function (nestedFormData) {
+    nestedFormData.withConcat(props.index, () => {
+        nestedFormData.append('id', props.id ?? '')
 
         if (props.type) {
-            pathFormData.append('type', props.type)
+            nestedFormData.append('type', props.type)
         }
 
-        pathFormData.append('mode', props.mode)
+        nestedFormData.append('mode', props.mode)
 
-        pathFormData.withAppendingAttribute('attributes', () => {
+        nestedFormData.withConcat('attributes', () => {
             for (const field of (props.fields ?? [])) {
-                field.fill(pathFormData)
+                field.fill(nestedFormData)
             }
         })
     })
