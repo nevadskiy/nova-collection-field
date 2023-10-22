@@ -133,7 +133,7 @@ class Page extends Model
 
 ### ManyToMorphCollection
 
-> Requires custom relation.
+> Requires custom relation
 
 Usage example for a `Page` model that has defined the Many-To-Morph relation.
 
