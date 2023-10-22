@@ -18,13 +18,14 @@ class ManyToMorphRelationStrategy implements Strategy
 
     public function get(Model $model, string $attribute): array
     {
-        $query = $model->{$attribute}();
+        $collection = $model->{$attribute}()->get();
 
         if ($this->field->sortBy) {
-            $query->orderBy($this->field->sortBy);
+            $collection = $collection->sortBy(function (Model $model) {
+                // @todo support custom "pivot" accessor
+                return $model->pivot->getAttribute($this->field->sortBy);
+            });
         }
-
-        $collection = $query->get();
 
         $resourcesByMorphClass = $this->getResourcesByMorphClass();
 
