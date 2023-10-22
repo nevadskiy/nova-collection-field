@@ -6,7 +6,7 @@ use Laravel\Nova\Fields\Collapsable;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class OneToManyCollection extends Field
+class HasManyCollection extends Field
 {
     use Collapsable;
 
@@ -24,7 +24,7 @@ class OneToManyCollection extends Field
 
         $this->resourceClass = $resourceClass;
 
-        $this->useStrategy(new OneToManyRelationStrategy());
+        $this->useStrategy(new HasManyRelationStrategy());
 
         $this->showOnIndex = false;
         $this->showOnDetail = false;

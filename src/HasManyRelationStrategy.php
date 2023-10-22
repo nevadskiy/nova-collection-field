@@ -5,13 +5,13 @@ namespace Nevadskiy\Nova\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class OneToManyRelationStrategy implements Strategy
+class HasManyRelationStrategy implements Strategy
 {
     use InteractsWithResourceFields;
 
-    protected OneToManyCollection $field;
+    protected HasManyCollection $field;
 
-    public function setField(OneToManyCollection $field): void
+    public function setField(HasManyCollection $field): void
     {
         $this->field = $field;
     }

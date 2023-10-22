@@ -2,7 +2,7 @@
 
 ## Usage
 
-### OneToManyCollection
+### HasManyCollection
 
 `FaqSection` resource:
 
@@ -14,7 +14,7 @@ use App\Nova\Resource;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Nevadskiy\Nova\Collection\OneToManyCollection;
+use Nevadskiy\Nova\Collection\HasManyCollection;
 
 class FaqSection extends Resource
 {
@@ -33,7 +33,7 @@ class FaqSection extends Resource
 
             Text::make('Heading'),
 
-            OneToManyCollection::make('Questions', 'items', FaqItem::class)
+            HasManyCollection::make('Questions', 'items', FaqItem::class)
                 ->sortBy('position')
                 ->stacked()
                 ->fullWidth()
@@ -59,7 +59,7 @@ class FaqSection extends Model
 }
 ```
 
-### ManyToAnyCollection
+### MorphToManyCollection
 
 Usage example for a `Page` model that has defined [Many-To-Many (Polymorphic)](https://laravel.com/docs/10.x/eloquent-relationships#many-to-many-polymorphic-relations) relations. 
 
@@ -114,22 +114,19 @@ class Page extends Model
     public function heroSections(): MorphToMany
     {
         return $this->morphedByMany(HeroSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
+            ->withPivot('position');
     }
 
     public function demoSections(): MorphToMany
     {
         return $this->morphedByMany(DemoSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
+            ->withPivot('position');
     }
 
     public function faqSections(): MorphToMany
     {
         return $this->morphedByMany(FaqSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
+            ->withPivot('position');
     }
 }
 ```
