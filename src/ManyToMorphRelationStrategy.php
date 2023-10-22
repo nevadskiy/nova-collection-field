@@ -51,9 +51,9 @@ class ManyToMorphRelationStrategy implements Strategy
     public function set(NovaRequest $request, $requestAttribute, $model, $attribute): callable
     {
         return function () use ($request, $requestAttribute, $model, $attribute) {
-            $collectionDictionary = $this->getCollectionDictionary($model, $attribute);
-
             $requestCollection = $request->all()[$requestAttribute] ?? [];
+
+            $collectionDictionary = $this->getCollectionDictionary($model, $attribute);
 
             $modelsForDetach = $this->getModelsForDetach($requestCollection, $collectionDictionary);
 
