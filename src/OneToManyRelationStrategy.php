@@ -3,11 +3,12 @@
 namespace Nevadskiy\Nova\Collection;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\UploadedFile;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class OneToManyRelationStrategy implements Strategy
 {
+    use InteractsWithResourceFields;
+
     protected OneToManyCollection $field;
 
     public function setField(OneToManyCollection $field): void
@@ -59,66 +60,31 @@ class OneToManyRelationStrategy implements Strategy
 
             foreach ($collection as $index => $resource) {
                 if ($resource['mode'] === 'create') {
-                    $this->createResourceModel($model->{$attribute}()->make(), $this->field->resourceClass, $resource['attributes'], $index);
+                    $this->createResourceModel(
+                        $this->field->resourceClass,
+                        $resource['attributes'],
+                        array_merge($this->getSortAttribute($index), [
+                            $model->{$attribute}()->getForeignKeyName() => $model->{$attribute}()->getParentKey()
+                        ])
+                    );
                 } else if ($resource['mode'] === 'update') {
-                    $this->updateResourceModel($relationModelsByKey[$resource['id']], $this->field->resourceClass, $resource['attributes'], $index);
+                    $this->updateResourceModel(
+                        $relationModelsByKey[$resource['id']],
+                        $this->field->resourceClass,
+                        $resource['attributes'],
+                        $this->getSortAttribute($index)
+                    );
                 }
             }
         };
     }
 
-    protected function createResourceModel(Model $model, string $resourceClass, array $attributes, int $index): Model
-    {
-        [$model, $callbacks] = $resourceClass::fill($this->newRequestFromAttributes($attributes), $model);
-
-        $this->fillSortableAttribute($model, $index);
-
-        $model->save();
-
-        foreach ($callbacks as $callback) {
-            $callback();
-        }
-
-        return $model;
-    }
-
-    protected function updateResourceModel(Model $model, string $resourceClass, array $attributes, int $index): void
-    {
-        [$model, $callbacks] = $resourceClass::fillForUpdate($this->newRequestFromAttributes($attributes), $model);
-
-        $this->fillSortableAttribute($model, $index);
-
-        $model->save();
-
-        foreach ($callbacks as $callback) {
-            $callback();
-        }
-    }
-
-    protected function fillSortableAttribute(Model $model, int $index): void
+    protected function getSortAttribute(int $index): array
     {
         if ($this->field->sortBy) {
-            $model->setAttribute($this->field->sortBy, $index);
-        }
-    }
-
-    protected function newRequestFromAttributes(array $attributes): NovaRequest
-    {
-        $requestServer = [];
-        $requestFiles = [];
-
-        foreach ($attributes as $attribute => $value) {
-            if ($value instanceof UploadedFile) {
-                $requestFiles[$attribute] = $value;
-            } else {
-                $requestServer[$attribute] = $value;
-            }
+            return [$this->field->sortBy => $index];
         }
 
-        $request = new NovaRequest([], $requestServer, [], [], $requestFiles);
-
-        $request->setMethod('POST');
-
-        return $request;
+        return [];
     }
 }
