@@ -77,7 +77,7 @@ class ManyToMorphRelationStrategy implements Strategy
 
                     $model->{$attribute}()->attach($collectionModelForAttach, ['position' => $index]);
                 } else if ($requestCollectionResource['mode'] === 'update') {
-                    $collectionModelForUpdate = $collectionDictionary[$requestCollectionResource['id'].':'.$requestCollectionResource['type']];
+                    $collectionModelForUpdate = $collectionDictionary[$this->getDictionaryKey($requestCollectionResource['id'], $requestCollectionResource['type'])];
 
                     $this->updateResourceModel($collectionModelForUpdate, $resourcesByType[$requestCollectionResource['type']], $requestCollectionResource['attributes']);
 
