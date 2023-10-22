@@ -57,9 +57,9 @@ class HasManyRelationStrategy implements Strategy
                     $this->createResourceModel(
                         $this->field->resourceClass,
                         $requestResource['attributes'],
-                        array_merge($this->getSortAttribute($index), [
+                        array_merge([
                             $model->{$attribute}()->getForeignKeyName() => $model->{$attribute}()->getParentKey()
-                        ])
+                        ], $this->getSortAttribute($index))
                     );
                 } else if ($requestResource['mode'] === 'update') {
                     $this->updateResourceModel(
