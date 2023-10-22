@@ -85,7 +85,7 @@ class Page extends Resource
 
             Text::make('Title'),
 
-            MorphToManyCollection::make('Sections')
+            MorphToManyCollection::make('Components')
                 ->resources([
                     'heroSections' => HeroSection::class,
                     'demoSections' => DemoSection::class,
@@ -113,20 +113,81 @@ class Page extends Model
 {
     public function heroSections(): MorphToMany
     {
-        return $this->morphedByMany(HeroSection::class, 'page_section')
+        return $this->morphedByMany(HeroSection::class, 'page_component')
             ->withPivot('position');
     }
 
     public function demoSections(): MorphToMany
     {
-        return $this->morphedByMany(DemoSection::class, 'page_section')
+        return $this->morphedByMany(DemoSection::class, 'page_component')
             ->withPivot('position');
     }
 
     public function faqSections(): MorphToMany
     {
-        return $this->morphedByMany(FaqSection::class, 'page_section')
+        return $this->morphedByMany(FaqSection::class, 'page_component')
             ->withPivot('position');
+    }
+}
+```
+
+### ManyToMorphCollection
+
+> Requires custom relation.
+
+Usage example for a `Page` model that has defined the Many-To-Morph relation.
+
+`Page` resource:
+
+```php
+namespace App\Nova;
+
+use App\Models\Page as PageModel;
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Http\Requests\NovaRequest;
+use Nevadskiy\Nova\Collection\MorphToManyCollection;
+
+class Page extends Resource
+{
+    public static string $model = PageModel::class;
+
+    public function fields(NovaRequest $request): array
+    {
+        return [
+            ID::make(),
+
+            Text::make('Title'),
+
+            ManyToMorphCollection::make('Components')
+                ->resources([
+                    HeroSection::class,
+                    DemoSection::class,
+                    FaqSection::class,
+                ])
+                ->sortBy('position')
+                ->attachable()
+                ->collapsable()
+                ->stacked()
+                ->fullWidth(),
+        ];
+    }
+}
+```
+
+`Page` model:
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+
+class Page extends Model
+{
+    public function components(): ManyToMorph
+    {
+        return $this->manyToMorph('page_component');
     }
 }
 ```
