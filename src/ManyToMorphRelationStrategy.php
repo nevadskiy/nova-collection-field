@@ -7,11 +7,11 @@ use Illuminate\Http\UploadedFile;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Resource;
 
-class ManyToAnyRelationStrategy implements Strategy
+class ManyToMorphRelationStrategy implements Strategy
 {
-    protected ManyToAnyCollection $field;
+    protected ManyToMorphCollection $field;
 
-    public function setField(ManyToAnyCollection $field): void
+    public function setField(ManyToMorphCollection $field): void
     {
         $this->field = $field;
     }
