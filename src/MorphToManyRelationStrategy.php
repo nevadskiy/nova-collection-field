@@ -30,6 +30,7 @@ class MorphToManyRelationStrategy implements Strategy
 
         if ($this->field->sortBy) {
             $collection = $collection->sortBy(function (Resource $resource) {
+                // @todo handle custom "pivot" accessor.
                 return $resource->model()->pivot->getAttribute($this->field->sortBy);
             });
         }
