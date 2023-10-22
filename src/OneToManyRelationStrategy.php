@@ -17,8 +17,6 @@ class OneToManyRelationStrategy implements Strategy
 
     public function get(Model $model, string $attribute): array
     {
-        $request = resolve(NovaRequest::class);
-
         $collection = $model->{$attribute}()->get();
 
         if ($this->field->sortBy) {
@@ -26,6 +24,8 @@ class OneToManyRelationStrategy implements Strategy
                 return $model->getAttribute($this->field->sortBy);
             });
         }
+
+        $request = resolve(NovaRequest::class);
 
         return $collection->map(function (Model $model) use ($request) {
             $resource = new $this->field->resourceClass($model);
