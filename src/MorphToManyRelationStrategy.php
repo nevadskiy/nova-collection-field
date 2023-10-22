@@ -28,9 +28,9 @@ class MorphToManyRelationStrategy implements Strategy
             );
         }
 
-        if ($this->field->sortByPivot) {
+        if ($this->field->sortBy) {
             $collection = $collection->sortBy(function (Resource $resource) {
-                return $resource->model()->pivot->getAttribute($this->field->sortByPivot);
+                return $resource->model()->pivot->getAttribute($this->field->sortBy);
             });
         }
 
@@ -130,8 +130,8 @@ class MorphToManyRelationStrategy implements Strategy
 
     protected function getPivotAttributes(array $resource): array
     {
-        if ($this->field->sortByPivot) {
-            return [$this->field->sortByPivot => $resource['index']];
+        if ($this->field->sortBy) {
+            return [$this->field->sortBy => $resource['index']];
         }
 
         return [];

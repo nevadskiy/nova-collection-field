@@ -15,7 +15,7 @@ class MorphToManyCollection extends Field
 
     public array $resources = [];
 
-    public ?string $sortByPivot = null;
+    public ?string $sortBy = null;
 
     public bool $attachable = false;
 
@@ -38,12 +38,9 @@ class MorphToManyCollection extends Field
         return $this;
     }
 
-    /**
-     * @todo rename to "sortBy"
-     */
-    public function sortByPivot(string $pivot): static
+    public function sortBy(?string $sortBy): static
     {
-        $this->sortByPivot = $pivot;
+        $this->sortBy = $sortBy;
 
         return $this;
     }
@@ -69,7 +66,7 @@ class MorphToManyCollection extends Field
     {
         return array_merge(parent::jsonSerialize(), [
             'resources' => $this->serializeResources(),
-            'sortable' => ! is_null($this->sortByPivot),
+            'sortable' => ! is_null($this->sortBy),
             'attachable' => $this->attachable,
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,

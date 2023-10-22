@@ -20,8 +20,8 @@ class ManyToMorphRelationStrategy implements Strategy
     {
         $query = $model->{$attribute}();
 
-        if ($this->field->sortByPivot) {
-            $query->orderBy($this->field->sortByPivot);
+        if ($this->field->sortBy) {
+            $query->orderBy($this->field->sortBy);
         }
 
         $collection = $query->get();
@@ -184,8 +184,8 @@ class ManyToMorphRelationStrategy implements Strategy
 
     protected function getPivotAttributes(int $index): array
     {
-        if ($this->field->sortByPivot) {
-            return [$this->field->sortByPivot => $index];
+        if ($this->field->sortBy) {
+            return [$this->field->sortBy => $index];
         }
 
         return [];

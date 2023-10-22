@@ -91,7 +91,7 @@ class Page extends Resource
                     'demoSections' => DemoSection::class,
                     'faqSections' => FaqSection::class,
                 ])
-                ->sortByPivot('position')
+                ->sortBy('position')
                 ->attachable()
                 ->collapsable()
                 ->stacked()

@@ -30,9 +30,9 @@ class OneToManyCollection extends Field
         $this->showOnDetail = false;
     }
 
-    public function sortBy(string $attribute): static
+    public function sortBy(?string $sortBy): static
     {
-        $this->sortBy = $attribute;
+        $this->sortBy = $sortBy;
 
         return $this;
     }
