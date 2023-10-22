@@ -10,7 +10,7 @@ class OneToManyCollection extends Field
 {
     use Collapsable;
 
-    public $component = 'one-to-many-collection-field';
+    public $component = 'collection-field';
 
     public string $resourceClass;
 

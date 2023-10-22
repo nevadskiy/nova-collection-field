@@ -11,7 +11,7 @@ class MorphToManyCollection extends Field
 {
     use Collapsable;
 
-    public $component = 'many-to-any-collection-field';
+    public $component = 'morph-collection-field';
 
     public array $resources = [];
 
