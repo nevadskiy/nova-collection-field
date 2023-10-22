@@ -69,19 +69,19 @@ class ManyToMorphRelationStrategy implements Strategy
                 if ($requestCollectionResource['mode'] === 'create') {
                     $collectionModelForCreate = $this->createResourceModel($resourcesByType[$requestCollectionResource['type']], $requestCollectionResource['attributes']);
 
-                    $model->{$attribute}()->attach($collectionModelForCreate, ['position' => $index]);
+                    $model->{$attribute}()->attach($collectionModelForCreate, $this->getPivotAttributes($index));
                 } else if ($requestCollectionResource['mode'] === 'attach') {
                     $collectionModelForAttach = $resourcesByType[$requestCollectionResource['type']]::newModel()->newQuery()->findOrFail($requestCollectionResource['id']);
 
                     $this->updateResourceModel($collectionModelForAttach, $resourcesByType[$requestCollectionResource['type']], $requestCollectionResource['attributes']);
 
-                    $model->{$attribute}()->attach($collectionModelForAttach, ['position' => $index]);
+                    $model->{$attribute}()->attach($collectionModelForAttach, $this->getPivotAttributes($index));
                 } else if ($requestCollectionResource['mode'] === 'update') {
                     $collectionModelForUpdate = $collectionDictionary[$this->getDictionaryKey($requestCollectionResource['id'], $requestCollectionResource['type'])];
 
                     $this->updateResourceModel($collectionModelForUpdate, $resourcesByType[$requestCollectionResource['type']], $requestCollectionResource['attributes']);
 
-                    $model->{$attribute}()->updateExistingPivot($collectionModelForUpdate, ['position' => $index]);
+                    $model->{$attribute}()->updateExistingPivot($collectionModelForUpdate, $this->getPivotAttributes($index));
                 }
             }
         };
@@ -180,5 +180,14 @@ class ManyToMorphRelationStrategy implements Strategy
         $request->setMethod('POST');
 
         return $request;
+    }
+
+    protected function getPivotAttributes(int $index): array
+    {
+        if ($this->field->sortByPivot) {
+            return [$this->field->sortByPivot => $index];
+        }
+
+        return [];
     }
 }
