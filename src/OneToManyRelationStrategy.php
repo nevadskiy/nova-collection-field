@@ -44,34 +44,28 @@ class OneToManyRelationStrategy implements Strategy
     public function set(NovaRequest $request, $requestAttribute, $model, $attribute): callable
     {
         return function () use ($request, $requestAttribute, $model, $attribute) {
-            $collection = $request->all()[$requestAttribute] ?? [];
+            $requestCollection = $request->all()[$requestAttribute] ?? [];
 
-            $collectionById = collect($collection)
-                ->filter(fn ($resource) => $resource['id'])
-                ->keyBy('id');
+            $collectionDictionary = $model->{$attribute}()->get()->getDictionary();
 
-            $relationModelsByKey = $model->{$attribute}()->get()->getDictionary();
-
-            foreach ($relationModelsByKey as $relationModel) {
-                if (! isset($collectionById[$relationModel->getKey()])) {
-                    $relationModel->delete();
-                }
+            foreach ($this->getModelsToDelete($requestCollection, $collectionDictionary) as $modelForDelete) {
+                $modelForDelete->delete();
             }
 
-            foreach ($collection as $index => $resource) {
-                if ($resource['mode'] === 'create') {
+            foreach ($requestCollection as $index => $requestResource) {
+                if ($requestResource['mode'] === 'create') {
                     $this->createResourceModel(
                         $this->field->resourceClass,
-                        $resource['attributes'],
+                        $requestResource['attributes'],
                         array_merge($this->getSortAttribute($index), [
                             $model->{$attribute}()->getForeignKeyName() => $model->{$attribute}()->getParentKey()
                         ])
                     );
-                } else if ($resource['mode'] === 'update') {
+                } else if ($requestResource['mode'] === 'update') {
                     $this->updateResourceModel(
-                        $relationModelsByKey[$resource['id']],
+                        $collectionDictionary[$requestResource['id']],
                         $this->field->resourceClass,
-                        $resource['attributes'],
+                        $requestResource['attributes'],
                         $this->getSortAttribute($index)
                     );
                 }
@@ -86,5 +80,22 @@ class OneToManyRelationStrategy implements Strategy
         }
 
         return [];
+    }
+
+    protected function getModelsToDelete(array $requestCollection, array $collectionDictionary): array
+    {
+        $modelsForDelete = [];
+
+        $requestCollectionDictionary = collect($requestCollection)
+            ->filter(fn($resource) => $resource['id'])
+            ->keyBy('id');
+
+        foreach ($collectionDictionary as $collectionModel) {
+            if (! isset($requestCollectionDictionary[$collectionModel->getKey()])) {
+                $modelsForDelete[] = $collectionModel;
+            }
+        }
+
+        return $modelsForDelete;
     }
 }

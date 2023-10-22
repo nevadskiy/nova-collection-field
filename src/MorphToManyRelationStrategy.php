@@ -53,31 +53,31 @@ class MorphToManyRelationStrategy implements Strategy
     public function set(NovaRequest $request, $requestAttribute, $model, $attribute): callable
     {
         return function () use ($request, $requestAttribute, $model) {
-            $collectionByType = collect($request->all()[$requestAttribute] ?? [])
+            $requestCollectionByType = collect($request->all()[$requestAttribute] ?? [])
                 ->map(fn (array $resource, $index) => array_merge($resource, [
                     'index' => $index
                 ]))
                 ->groupBy('type');
 
             foreach ($this->field->resources as $relation => $resourceClass) {
-                $resourceCollection = $collectionByType[$resourceClass::uriKey()] ?? [];
+                $requestCollection = $requestCollectionByType[$resourceClass::uriKey()] ?? [];
 
                 $syncPayload = [];
 
-                foreach ($resourceCollection as $resource) {
-                    $resourceModelsByKey = $resourceClass::newModel()
+                foreach ($requestCollection as $requestResource) {
+                    $collectionDictionary = $resourceClass::newModel()
                         ->newQuery()
-                        ->findMany(collect($resourceCollection)->map(fn (array $resource) => $resource['id'])->filter())
+                        ->findMany(collect($requestCollection)->map(fn (array $resource) => $requestResource['id'])->filter())
                         ->getDictionary();
 
-                    if ($resource['mode'] === 'create') {
-                        $resourceModel = $this->createResourceModel($resourceClass, $resource['attributes']);
+                    if ($requestResource['mode'] === 'create') {
+                        $modelForCreate = $this->createResourceModel($resourceClass, $requestResource['attributes']);
 
-                        $syncPayload[$resourceModel->getKey()] = $this->getPivotAttributes($resource);
-                    } else if ($resource['mode'] === 'update' || $resource['mode'] === 'attach') {
-                        $this->updateResourceModel($resourceModelsByKey[$resource['id']], $resourceClass, $resource['attributes']);
+                        $syncPayload[$modelForCreate->getKey()] = $this->getPivotAttributes($requestResource);
+                    } else if ($requestResource['mode'] === 'update' || $requestResource['mode'] === 'attach') {
+                        $this->updateResourceModel($collectionDictionary[$requestResource['id']], $resourceClass, $requestResource['attributes']);
 
-                        $syncPayload[$resource['id']] = $this->getPivotAttributes($resource);
+                        $syncPayload[$requestResource['id']] = $this->getPivotAttributes($requestResource);
                     }
                 }
 

@@ -28,10 +28,10 @@ class ManyToMorphRelationStrategy implements Strategy
             });
         }
 
-        $resourcesByMorphClass = $this->getResourcesByMorphClass();
+        $resourceClassesByMorphClass = $this->getResourceClassesByMorphClass();
 
-        $collection = $collection->map(function (Model $model) use ($resourcesByMorphClass) {
-            return new $resourcesByMorphClass[$model->getMorphClass()]($model);
+        $collection = $collection->map(function (Model $model) use ($resourceClassesByMorphClass) {
+            return new $resourceClassesByMorphClass[$model->getMorphClass()]($model);
         });
 
         $request = resolve(NovaRequest::class);
@@ -55,60 +55,60 @@ class ManyToMorphRelationStrategy implements Strategy
 
             $requestCollection = $request->all()[$requestAttribute] ?? [];
 
-            $collectionForDetach = $this->getCollectionForDetach($requestCollection, $collectionDictionary);
+            $modelsForDetach = $this->getModelsForDetach($requestCollection, $collectionDictionary);
 
-            foreach ($collectionForDetach as $collectionModelForDetach) {
-                $model->{$attribute}()->detach($collectionModelForDetach);
+            foreach ($modelsForDetach as $modelForDetach) {
+                $model->{$attribute}()->detach($modelForDetach);
             }
 
-            $resourcesByType = [];
+            $resourceClassesByType = [];
 
             foreach ($this->field->resources as $resource) {
-                $resourcesByType[$resource::uriKey()] = $resource;
+                $resourceClassesByType[$resource::uriKey()] = $resource;
             }
 
-            foreach ($requestCollection as $index => $requestCollectionResource) {
-                if ($requestCollectionResource['mode'] === 'create') {
-                    $collectionModelForCreate = $this->createResourceModel($resourcesByType[$requestCollectionResource['type']], $requestCollectionResource['attributes']);
+            foreach ($requestCollection as $index => $requestResource) {
+                if ($requestResource['mode'] === 'create') {
+                    $modelForCreate = $this->createResourceModel($resourceClassesByType[$requestResource['type']], $requestResource['attributes']);
 
-                    $model->{$attribute}()->attach($collectionModelForCreate, $this->getPivotAttributes($index));
-                } else if ($requestCollectionResource['mode'] === 'attach') {
-                    $collectionModelForAttach = $resourcesByType[$requestCollectionResource['type']]::newModel()->newQuery()->findOrFail($requestCollectionResource['id']);
+                    $model->{$attribute}()->attach($modelForCreate, $this->getPivotAttributes($index));
+                } else if ($requestResource['mode'] === 'attach') {
+                    $modelForAttach = $resourceClassesByType[$requestResource['type']]::newModel()->newQuery()->findOrFail($requestResource['id']);
 
-                    $this->updateResourceModel($collectionModelForAttach, $resourcesByType[$requestCollectionResource['type']], $requestCollectionResource['attributes']);
+                    $this->updateResourceModel($modelForAttach, $resourceClassesByType[$requestResource['type']], $requestResource['attributes']);
 
-                    $model->{$attribute}()->attach($collectionModelForAttach, $this->getPivotAttributes($index));
-                } else if ($requestCollectionResource['mode'] === 'update') {
-                    $collectionModelForUpdate = $collectionDictionary[$this->getDictionaryKey($requestCollectionResource['id'], $requestCollectionResource['type'])];
+                    $model->{$attribute}()->attach($modelForAttach, $this->getPivotAttributes($index));
+                } else if ($requestResource['mode'] === 'update') {
+                    $modelForUpdate = $collectionDictionary[$this->getDictionaryKey($requestResource['id'], $requestResource['type'])];
 
-                    $this->updateResourceModel($collectionModelForUpdate, $resourcesByType[$requestCollectionResource['type']], $requestCollectionResource['attributes']);
+                    $this->updateResourceModel($modelForUpdate, $resourceClassesByType[$requestResource['type']], $requestResource['attributes']);
 
-                    $model->{$attribute}()->updateExistingPivot($collectionModelForUpdate, $this->getPivotAttributes($index));
+                    $model->{$attribute}()->updateExistingPivot($modelForUpdate, $this->getPivotAttributes($index));
                 }
             }
         };
     }
 
-    protected function getResourcesByMorphClass(): array
+    protected function getResourceClassesByMorphClass(): array
     {
-        $resourcesByMorphClass = [];
+        $resourceClassesByMorphClass = [];
 
-        foreach ($this->field->resources as $resource) {
-            $resourcesByMorphClass[$resource::newModel()->getMorphClass()] = $resource;
+        foreach ($this->field->resources as $resourceClass) {
+            $resourceClassesByMorphClass[$resourceClass::newModel()->getMorphClass()] = $resourceClass;
         }
 
-        return $resourcesByMorphClass;
+        return $resourceClassesByMorphClass;
     }
 
     protected function getCollectionDictionary($model, $attribute): array
     {
-        $resourcesByMorphClass = $this->getResourcesByMorphClass();
+        $resourceClassesByMorphClass = $this->getResourceClassesByMorphClass();
 
         return $model->{$attribute}()->get()
-            ->keyBy(function (Model $model) use ($resourcesByMorphClass) {
+            ->keyBy(function (Model $model) use ($resourceClassesByMorphClass) {
                 return $this->getDictionaryKey(
                     $model->getKey(),
-                    $resourcesByMorphClass[$model->getMorphClass()]::uriKey()
+                    $resourceClassesByMorphClass[$model->getMorphClass()]::uriKey()
                 );
             })
             ->all();
@@ -119,7 +119,7 @@ class ManyToMorphRelationStrategy implements Strategy
         return sprintf("%s:%s", $id, $type);
     }
 
-    protected function getCollectionForDetach(array $requestCollection, array $collectionDictionary): array
+    protected function getModelsForDetach(array $requestCollection, array $collectionDictionary): array
     {
         $requestCollectionDictionary = [];
 
@@ -129,15 +129,15 @@ class ManyToMorphRelationStrategy implements Strategy
             $requestCollectionDictionary[$dictionaryKey] = $requestResource;
         }
 
-        $collectionForDetach = [];
+        $modelsForDetach = [];
 
         foreach ($collectionDictionary as $dictionaryKey => $collectionModel) {
             if (! isset($requestCollectionDictionary[$dictionaryKey])) {
-                $collectionForDetach[] = $collectionModel;
+                $modelsForDetach[] = $collectionModel;
             }
         }
 
-        return $collectionForDetach;
+        return $modelsForDetach;
     }
 
     protected function getPivotAttributes(int $index): array
