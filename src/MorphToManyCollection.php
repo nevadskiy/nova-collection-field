@@ -38,6 +38,9 @@ class MorphToManyCollection extends Field
         return $this;
     }
 
+    /**
+     * @todo rename to "sortBy"
+     */
     public function sortByPivot(string $pivot): static
     {
         $this->sortByPivot = $pivot;
