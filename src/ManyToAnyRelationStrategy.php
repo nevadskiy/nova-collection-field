@@ -109,7 +109,7 @@ class ManyToAnyRelationStrategy implements Strategy
 
                     $this->updateResourceModel($collectionModelForUpdate, $resourcesByType[$requestModel['type']], $requestModel['attributes']);
 
-                    $model->{$attribute}()->update($collectionModelForUpdate, ['position' => $index]);
+                    $model->{$attribute}()->updateExistingPivot($collectionModelForUpdate, ['position' => $index]);
                 }
             }
         };
