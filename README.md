@@ -181,7 +181,6 @@ class Page extends Resource
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Page extends Model
 {
