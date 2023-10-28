@@ -124,9 +124,11 @@ class ManyToMorphRelationStrategy implements Strategy
         $requestCollectionDictionary = [];
 
         foreach ($requestCollection as $requestResource) {
-            $dictionaryKey = $this->getDictionaryKey($requestResource['id'], $requestResource['type']);
+            if (isset($requestResource['id'])) {
+                $dictionaryKey = $this->getDictionaryKey($requestResource['id'], $requestResource['type']);
 
-            $requestCollectionDictionary[$dictionaryKey] = $requestResource;
+                $requestCollectionDictionary[$dictionaryKey] = $requestResource;
+            }
         }
 
         $modelsForDetach = [];
