@@ -61,7 +61,7 @@ class FaqSection extends Model
 
 ### MorphToManyCollection
 
-Usage example for a `Page` model that has defined [Many-To-Many (Polymorphic)](https://laravel.com/docs/10.x/eloquent-relationships#many-to-many-polymorphic-relations) relations. 
+Usage example for a `Page` model that has defined [Many-To-Many (Polymorphic)](https://laravel.com/docs/eloquent-relationships#many-to-many-polymorphic-relations) relations. 
 
 `Page` resource:
 
