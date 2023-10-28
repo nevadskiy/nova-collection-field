@@ -8,11 +8,11 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 trait InteractsWithResourceFields
 {
-    protected function createResourceModel(string $resourceClass, array $attributes, array $extra = []): Model
+    protected function createResourceModel(string $resourceClass, array $requestAttributes, array $attributes = []): Model
     {
-        [$model, $callbacks] = $resourceClass::fill($this->newRequestFromAttributes($attributes), $resourceClass::newModel());
+        [$model, $callbacks] = $resourceClass::fill($this->newRequestFromAttributes($requestAttributes), $resourceClass::newModel());
 
-        $model->forceFill($extra);
+        $model->forceFill($attributes);
 
         $model->save();
 
@@ -23,11 +23,11 @@ trait InteractsWithResourceFields
         return $model;
     }
 
-    protected function updateResourceModel(Model $model, string $resourceClass, array $attributes, array $extra = []): void
+    protected function updateResourceModel(Model $model, string $resourceClass, array $requestAttributes, array $attributes = []): void
     {
-        [$model, $callbacks] = $resourceClass::fillForUpdate($this->newRequestFromAttributes($attributes), $model);
+        [$model, $callbacks] = $resourceClass::fillForUpdate($this->newRequestFromAttributes($requestAttributes), $model);
 
-        $model->forceFill($extra);
+        $model->forceFill($attributes);
 
         $model->save();
 
