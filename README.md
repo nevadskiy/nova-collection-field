@@ -194,3 +194,9 @@ class Page extends Model
     }
 }
 ```
+
+## To-Do List
+
+- [ ] validation
+- [ ] detail view
+- [ ] delete with detach when is not used attachable mode
