@@ -1,13 +1,13 @@
 /**
  * @todo add missing methods for decorator: https://developer.mozilla.org/en-US/docs/Web/API/FormData
  */
-export class PathFormData {
+export class NestedFormData {
     static decorate(formData) {
-        if (formData instanceof PathFormData) {
+        if (formData instanceof NestedFormData) {
             return formData
         }
 
-        return new PathFormData(formData)
+        return new NestedFormData(formData)
     }
 
     constructor(formData) {
@@ -15,7 +15,7 @@ export class PathFormData {
         this.path = ''
     }
 
-    withAppendingAttribute(attribute, callback) {
+    withConcat(attribute, callback) {
         const original = this.path
 
         this.path = this.concat(attribute)

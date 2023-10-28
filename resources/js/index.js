@@ -1,7 +1,7 @@
-import OneToManyCollectionField from './components/OneToManyCollectionField.vue'
-import ManyToAnyCollectionField from './components/ManyToAnyCollectionField.vue'
+import CollectionField from './components/CollectionField.vue'
+import MorphCollectionField from './components/MorphCollectionField.vue'
 
 Nova.booting((app, store) => {
-    app.component('form-one-to-many-collection-field', OneToManyCollectionField)
-    app.component('form-many-to-any-collection-field', ManyToAnyCollectionField)
+    app.component('form-collection-field', CollectionField)
+    app.component('form-morph-collection-field', MorphCollectionField)
 })

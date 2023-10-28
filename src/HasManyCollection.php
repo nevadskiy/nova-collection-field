@@ -6,11 +6,11 @@ use Laravel\Nova\Fields\Collapsable;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class OneToManyCollection extends Field
+class HasManyCollection extends Field
 {
     use Collapsable;
 
-    public $component = 'one-to-many-collection-field';
+    public $component = 'collection-field';
 
     public string $resourceClass;
 
@@ -24,15 +24,15 @@ class OneToManyCollection extends Field
 
         $this->resourceClass = $resourceClass;
 
-        $this->useStrategy(new OneToManyRelationStrategy());
+        $this->useStrategy(new HasManyRelationStrategy());
 
         $this->showOnIndex = false;
         $this->showOnDetail = false;
     }
 
-    public function sortBy(string $attribute): static
+    public function sortBy(?string $sortBy): static
     {
-        $this->sortBy = $attribute;
+        $this->sortBy = $sortBy;
 
         return $this;
     }
@@ -51,7 +51,7 @@ class OneToManyCollection extends Field
     {
         return array_merge(parent::jsonSerialize(), [
             'resource' => $this->serializeResource(),
-            'sortable' => (bool) $this->sortBy,
+            'sortable' => ! is_null($this->sortBy),
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,
         ]);

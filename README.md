@@ -1,16 +1,10 @@
 # Collection fields for Laravel Nova
 
-## Available fields
-
-- [x] OneToManyCollection
-- [ ] ManyToManyCollection
-- [x] ManyToAnyCollection
-
 ## Usage
 
-### OneToManyCollection
+### HasManyCollection
 
-`FaqSection` resource:
+FaqSection resource:
 
 ```php
 namespace App\Nova;
@@ -20,7 +14,7 @@ use App\Nova\Resource;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Nevadskiy\Nova\Collection\OneToManyCollection;
+use Nevadskiy\Nova\Collection\HasManyCollection;
 
 class FaqSection extends Resource
 {
@@ -39,7 +33,7 @@ class FaqSection extends Resource
 
             Text::make('Heading'),
 
-            OneToManyCollection::make('Questions', 'items', FaqItem::class)
+            HasManyCollection::make('Questions', 'items', FaqItem::class)
                 ->sortBy('position')
                 ->stacked()
                 ->fullWidth()
@@ -48,7 +42,7 @@ class FaqSection extends Resource
 }
 ```
 
-`FaqSection` model:
+FaqSection model:
 
 ```php
 namespace App\Models;
@@ -65,11 +59,11 @@ class FaqSection extends Model
 }
 ```
 
-### ManyToAnyCollection
+### MorphToManyCollection
 
-Usage example for a `Page` model that has defined [Many-To-Many (Polymorphic)](https://laravel.com/docs/10.x/eloquent-relationships#many-to-many-polymorphic-relations) relations. 
+Usage example for a `Page` model that has defined [Many-To-Many (Polymorphic)](https://laravel.com/docs/eloquent-relationships#many-to-many-polymorphic-relations) relations. 
 
-`Page` resource:
+Page resource:
 
 ```php
 namespace App\Nova;
@@ -78,7 +72,7 @@ use App\Models\Page as PageModel;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Nevadskiy\Nova\Collection\ManyToAnyCollection;
+use Nevadskiy\Nova\Collection\MorphToManyCollection;
 
 class Page extends Resource
 {
@@ -91,13 +85,87 @@ class Page extends Resource
 
             Text::make('Title'),
 
-            ManyToAnyCollection::make('Sections')
+            MorphToManyCollection::make('Components')
                 ->resources([
-                    HeroSection::class => 'heroSections',
-                    DemoSection::class => 'demoSections',
-                    FaqSection::class => 'faqSections',
+                    'heroSections' => HeroSection::class,
+                    'demoSections' => DemoSection::class,
+                    'faqSections' => FaqSection::class,
                 ])
-                ->sortByPivot('position')
+                ->sortBy('position')
+                ->attachable()
+                ->collapsable()
+                ->stacked()
+                ->fullWidth(),
+        ];
+    }
+}
+```
+
+Page model:
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+
+class Page extends Model
+{
+    public function heroSections(): MorphToMany
+    {
+        return $this->morphedByMany(HeroSection::class, 'page_component')
+            ->withPivot('position');
+    }
+
+    public function demoSections(): MorphToMany
+    {
+        return $this->morphedByMany(DemoSection::class, 'page_component')
+            ->withPivot('position');
+    }
+
+    public function faqSections(): MorphToMany
+    {
+        return $this->morphedByMany(FaqSection::class, 'page_component')
+            ->withPivot('position');
+    }
+}
+```
+
+### ManyToMorphCollection
+
+If you do not want to define a separate relation for each model type, you can use `ManyToMorphCollection` field that requires a separate [ManyToMorph](https://github.com/nevadskiy/laravel-many-to-morph) relation.
+
+Usage example for a `Page` model that has defined the Many-To-Morph relation.
+
+Page resource:
+
+```php
+namespace App\Nova;
+
+use App\Models\Page as PageModel;
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Http\Requests\NovaRequest;
+use Nevadskiy\Nova\Collection\MorphToManyCollection;
+
+class Page extends Resource
+{
+    public static string $model = PageModel::class;
+
+    public function fields(NovaRequest $request): array
+    {
+        return [
+            ID::make(),
+
+            Text::make('Title'),
+
+            ManyToMorphCollection::make('Components')
+                ->resources([
+                    HeroSection::class,
+                    DemoSection::class,
+                    FaqSection::class,
+                ])
+                ->sortBy('position')
                 ->attachable()
                 ->collapsable()
                 ->stacked()
@@ -113,29 +181,22 @@ class Page extends Resource
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Nevadskiy\ManyToMorph\HasManyToMorph;
+use Nevadskiy\ManyToMorph\ManyToMorph;
 
 class Page extends Model
 {
-    public function heroSections(): MorphToMany
-    {
-        return $this->morphedByMany(HeroSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
-    }
+    use HasManyToMorph;
 
-    public function demoSections(): MorphToMany
+    public function components(): ManyToMorph
     {
-        return $this->morphedByMany(DemoSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
-    }
-
-    public function faqSections(): MorphToMany
-    {
-        return $this->morphedByMany(FaqSection::class, 'page_section')
-            ->withPivot('position')
-            ->withTimestamps();
+        return $this->manyToMorph('page_component');
     }
 }
 ```
+
+## To-Do List
+
+- [ ] validation
+- [ ] detail view
+- [ ] delete with detach when is not used attachable mode

@@ -52,7 +52,7 @@ import { FormField, HandlesValidationErrors } from 'laravel-nova'
 import cloneDeep from 'lodash/cloneDeep'
 import uniqueId from 'lodash/uniqueId'
 import CollectionItem from "./CollectionItem.vue"
-import { PathFormData } from '../path-form-data'
+import { NestedFormData } from '../nested-form-data'
 
 export default {
     mixins: [
@@ -90,11 +90,11 @@ export default {
                 return;
             }
 
-            const pathFormData = PathFormData.decorate(formData)
+            const nestedFormData = NestedFormData.decorate(formData)
 
-            pathFormData.withAppendingAttribute(this.field.attribute, () => {
+            nestedFormData.withConcat(this.field.attribute, () => {
                 for (const itemComponent of this.$refs.itemComponents) {
-                    itemComponent.fill(pathFormData)
+                    itemComponent.fill(nestedFormData)
                 }
             })
         },
