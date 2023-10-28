@@ -133,7 +133,7 @@ class Page extends Model
 
 ### ManyToMorphCollection
 
-> Requires custom relation
+If you do not want to define a separate relation for each model type, you can use `ManyToMorphCollection` field that requires a separate [ManyToMorph](https://github.com/nevadskiy/laravel-many-to-morph) relation.
 
 Usage example for a `Page` model that has defined the Many-To-Morph relation.
 
@@ -181,9 +181,13 @@ class Page extends Resource
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Nevadskiy\ManyToMorph\HasManyToMorph;
+use Nevadskiy\ManyToMorph\ManyToMorph;
 
 class Page extends Model
 {
+    use HasManyToMorph;
+
     public function components(): ManyToMorph
     {
         return $this->manyToMorph('page_component');

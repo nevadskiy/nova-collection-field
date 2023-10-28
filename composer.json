@@ -24,6 +24,9 @@
             ]
         }
     },
+    "suggest": {
+        "nevadskiy/laravel-many-to-morph": "Required to use ManyToMorphCollection field."
+    },
     "config": {
         "sort-packages": true
     },
