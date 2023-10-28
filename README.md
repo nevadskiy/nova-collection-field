@@ -4,7 +4,7 @@
 
 ### HasManyCollection
 
-`FaqSection` resource:
+FaqSection resource:
 
 ```php
 namespace App\Nova;
@@ -42,7 +42,7 @@ class FaqSection extends Resource
 }
 ```
 
-`FaqSection` model:
+FaqSection model:
 
 ```php
 namespace App\Models;
@@ -63,7 +63,7 @@ class FaqSection extends Model
 
 Usage example for a `Page` model that has defined [Many-To-Many (Polymorphic)](https://laravel.com/docs/eloquent-relationships#many-to-many-polymorphic-relations) relations. 
 
-`Page` resource:
+Page resource:
 
 ```php
 namespace App\Nova;
@@ -101,7 +101,7 @@ class Page extends Resource
 }
 ```
 
-`Page` model:
+Page model:
 
 ```php
 namespace App\Models;
@@ -137,7 +137,7 @@ If you do not want to define a separate relation for each model type, you can us
 
 Usage example for a `Page` model that has defined the Many-To-Morph relation.
 
-`Page` resource:
+Page resource:
 
 ```php
 namespace App\Nova;
