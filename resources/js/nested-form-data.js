@@ -1,8 +1,5 @@
-/**
- * @todo add missing methods for decorator: https://developer.mozilla.org/en-US/docs/Web/API/FormData
- */
 export class NestedFormData {
-    static decorate(formData) {
+    static wrap(formData) {
         if (formData instanceof NestedFormData) {
             return formData
         }
@@ -18,24 +15,28 @@ export class NestedFormData {
     withConcat(attribute, callback) {
         const original = this.path
 
-        this.path = this.concat(attribute)
+        this.path = this.#concat(attribute)
 
         callback()
 
         this.path = original
     }
 
-    concat(attribute) {
-        return this.path ? `${this.path}.${attribute}` : attribute
-    }
-
     append(attribute, value) {
-        this.formData.append(this.normalizeAttribute(attribute), value)
+        const path = this.#concat(attribute)
+
+        this.formData.append(this.#formatPath(path), value)
     }
 
-    normalizeAttribute(attribute) {
-        const path = this.concat(attribute)
+    #concat(attribute) {
+        attribute = String(attribute).replace(/\[(\w+)\]/g, '.$1')
 
+        return this.path ?
+            `${this.path}.${attribute}`
+            : attribute
+    }
+
+    #formatPath(path) {
         const segments = path.split('.');
 
         let result = segments[0];
