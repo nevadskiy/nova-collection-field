@@ -90,7 +90,9 @@ const toggleCollapse = function () {
 
 const fill = function (nestedFormData) {
     nestedFormData.withConcat(props.index, () => {
-        nestedFormData.append('id', props.id ?? '')
+        if (props.id) {
+            nestedFormData.append('id', props.id)
+        }
 
         if (props.type) {
             nestedFormData.append('type', props.type)

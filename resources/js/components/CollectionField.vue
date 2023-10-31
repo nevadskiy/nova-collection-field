@@ -90,7 +90,7 @@ export default {
                 return;
             }
 
-            const nestedFormData = NestedFormData.decorate(formData)
+            const nestedFormData = NestedFormData.wrap(formData)
 
             nestedFormData.withConcat(this.field.attribute, () => {
                 for (const itemComponent of this.$refs.itemComponents) {
