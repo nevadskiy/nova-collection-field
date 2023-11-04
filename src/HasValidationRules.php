@@ -15,14 +15,25 @@ trait HasValidationRules
 {
     abstract protected function getRequestResourcesForValidation(NovaRequest $request): Collection;
 
+    public function getRules(NovaRequest $request): array
+    {
+        return [];
+    }
+
     public function getCreationRules(NovaRequest $request): array
     {
+        return [];
+
+        if ($request->method() === 'GET') {
+            return [];
+        }
+
         return $this->getRequestResourcesForValidation($request)
             ->flatMap(function (Resource $resource, string $key) use ($request) {
                 return FieldCollection::make($resource->fields($request))
                     ->mapWithKeys(function (Field $field) use ($request, $key) {
                         return [
-                            $this->getValidationKeyByField($field, $key) => $field->getCreationRules($request)
+                            $this->getValidationKeyByField($field, $key) => $field->rules
                         ];
                     });
             })
@@ -31,12 +42,18 @@ trait HasValidationRules
 
     public function getUpdateRules(NovaRequest $request): array
     {
+        return [];
+
+        if ($request->method() === 'GET') {
+            return [];
+        }
+
         return $this->getRequestResourcesForValidation($request)
             ->flatMap(function (Resource $resource, string $key) use ($request) {
                 return FieldCollection::make($resource->fields($request))
                     ->mapWithKeys(function (Field $field) use ($request, $key) {
                         return [
-                            $this->getValidationKeyByField($field, $key) => $field->getUpdateRules($request)
+                            $this->getValidationKeyByField($field, $key) => $field->rules
                         ];
                     });
             })
