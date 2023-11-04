@@ -13,7 +13,7 @@
             </button>
 
             <h4 class="ml-3 font-bold mr-auto">
-                #{{ index + 1 }} {{ title }}
+                {{ title }}
             </h4>
 
             <IconButton
@@ -45,8 +45,8 @@
 
         <div v-show="!collapsed" class="grid grid-cols-full divide-y divide-gray-100 dark:divide-gray-700">
             <component
-                v-for="(field, index) in fields"
-                :key="index"
+                v-for="(field, fieldIndex) in fields"
+                :key="fieldIndex"
                 :is="`form-${field.component}`"
                 :field="field"
                 :errors="errors"
@@ -58,18 +58,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const props = defineProps([
     'fields',
     'errors',
     'resourceName',
     'resourceId',
-    'path',
-    'index',
-    'id',
-    'type',
-    'mode',
     'title',
     'collapsable',
     'collapsedByDefault',
@@ -88,24 +83,10 @@ const toggleCollapse = function () {
     collapsed.value = !collapsed.value
 }
 
-const fill = function (nestedFormData) {
-    nestedFormData.withConcat(props.index, () => {
-        if (props.id) {
-            nestedFormData.append('id', props.id)
-        }
-
-        if (props.type) {
-            nestedFormData.append('type', props.type)
-        }
-
-        nestedFormData.append('mode', props.mode)
-
-        nestedFormData.withConcat('attributes', () => {
-            for (const field of (props.fields ?? [])) {
-                field.fill(nestedFormData)
-            }
-        })
-    })
+const fill = function (formData) {
+    for (const field of (props.fields ?? [])) {
+        field.fill(formData)
+    }
 }
 
 defineExpose({
