@@ -49,9 +49,9 @@
                 :key="fieldIndex"
                 :is="`form-${field.component}`"
                 :field="field"
-                :errors="errors"
-                :resource-id="resourceId"
                 :resource-name="resourceName"
+                :resource-id="resourceId"
+                :errors="errors"
             />
         </div>
     </div>
@@ -60,16 +60,52 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const props = defineProps([
-    'fields',
-    'errors',
-    'resourceName',
-    'resourceId',
-    'title',
-    'collapsable',
-    'collapsedByDefault',
-    'sortable',
-])
+const props = defineProps({
+    fields: {
+        type: Array,
+        required: true
+    },
+
+    title: {
+        type: String,
+        required: true
+    },
+
+    collapsable: {
+        type: Boolean,
+        default: false
+    },
+
+    collapsedByDefault: {
+        type: Boolean,
+        default: false
+    },
+
+    sortable: {
+        type: Boolean,
+        default: false
+    },
+
+    skipIfNoChanges: {
+        type: Boolean,
+        default: false
+    },
+
+    errors: {
+        type: Object,
+        default: null
+    },
+
+    resourceName: {
+        type: String,
+        required: true
+    },
+
+    resourceId: {
+        type: [String, Number],
+        default: null
+    },
+})
 
 const emits = defineEmits([
     'move-up',
@@ -79,13 +115,49 @@ const emits = defineEmits([
 
 const collapsed = ref(props.collapsedByDefault)
 
-const toggleCollapse = function () {
+function toggleCollapse() {
     collapsed.value = !collapsed.value
 }
 
-const fill = function (formData) {
+function fillFormData(formData) {
     for (const field of (props.fields ?? [])) {
         field.fill(formData)
+    }
+}
+
+function compareFormData(source, target) {
+    for (let [key, value] of target.entries()) {
+        if (source.get(key) !== value) {
+            return false
+        }
+    }
+
+    return true
+}
+
+function copyFormData(source, target) {
+    for (let [key, value] of source.entries()) {
+        target.append(key, value)
+    }
+}
+
+const originalFormData = new FormData()
+
+onMounted(function () {
+    fillFormData(originalFormData)
+})
+
+function fill(formData) {
+    if (props.skipIfNoChanges) {
+        const currentFormData = new FormData()
+
+        fillFormData(currentFormData)
+
+        if (! compareFormData(originalFormData, currentFormData)) {
+            copyFormData(currentFormData, formData)
+        }
+    } else {
+        fillFormData(formData)
     }
 }
 
