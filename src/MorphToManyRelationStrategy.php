@@ -80,7 +80,9 @@ class MorphToManyRelationStrategy implements Strategy
 
                         $syncPayload[$modelForCreate->getKey()] = $this->getPivotAttributes($requestResource);
                     } else if ($requestResource['mode'] === 'update' || $requestResource['mode'] === 'attach') {
-                        $this->updateResourceModel($collectionDictionary[$requestResource['id']], $resourceClass, $requestResource['attributes']);
+                        if (isset($requestResource['attributes'])) {
+                            $this->updateResourceModel($collectionDictionary[$requestResource['id']], $resourceClass, $requestResource['attributes']);
+                        }
 
                         $syncPayload[$requestResource['id']] = $this->getPivotAttributes($requestResource);
                     }
