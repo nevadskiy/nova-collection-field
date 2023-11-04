@@ -11,11 +11,14 @@
                     v-for="(item, index) in collection"
                     :key="item.uid"
                     ref="itemComponents"
-                    :field="field"
+                    :id="item.id"
+                    :type="item.type"
+                    :mode="item.mode"
+                    :index="index"
                     :fields="item.fields"
                     :errors="errors"
-                    :resource-name="item.type"
                     :resource-id="item.id"
+                    :resource-name="item.type"
                     :title="item.singularLabel"
                     :sortable="field.sortable"
                     :collapsable="field.collapsable"
@@ -156,21 +159,9 @@ export default {
             const nestedFormData = NestedFormData.wrap(formData)
 
             nestedFormData.withConcat(this.field.attribute, () => {
-                this.collection.forEach((item, index) => {
-                    nestedFormData.withConcat(index, () => {
-                        if (item.id) {
-                            nestedFormData.append('id', item.id)
-                        }
-
-                        nestedFormData.append('type', item.type)
-
-                        nestedFormData.append('mode', item.mode)
-
-                        nestedFormData.withConcat('attributes', () => {
-                            this.$refs.itemComponents[index].fill(nestedFormData)
-                        })
-                    })
-                })
+                for (const itemComponent of this.$refs.itemComponents) {
+                    itemComponent.fill(nestedFormData)
+                }
             })
         },
 
