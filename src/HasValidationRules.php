@@ -15,45 +15,38 @@ trait HasValidationRules
 {
     abstract protected function getRequestResourcesForValidation(NovaRequest $request): Collection;
 
-    public function getRules(NovaRequest $request): array
-    {
-        return [];
-    }
-
     public function getCreationRules(NovaRequest $request): array
     {
-        return [];
+        return array_merge_recursive(parent::getCreationRules($request), $this->getCollectionUpdateRules($request));
+    }
 
-        if ($request->method() === 'GET') {
-            return [];
-        }
+    public function getUpdateRules(NovaRequest $request): array
+    {
+        return array_merge_recursive(parent::getUpdateRules($request), $this->getCollectionUpdateRules($request));
+    }
 
+    protected function getCollectionCreationRules($request): array
+    {
         return $this->getRequestResourcesForValidation($request)
             ->flatMap(function (Resource $resource, string $key) use ($request) {
                 return FieldCollection::make($resource->fields($request))
                     ->mapWithKeys(function (Field $field) use ($request, $key) {
                         return [
-                            $this->getValidationKeyByField($field, $key) => $field->rules
+                            $this->getValidationKeyByField($field, $key) => $field->getCreationRules($request)
                         ];
                     });
             })
             ->all();
     }
 
-    public function getUpdateRules(NovaRequest $request): array
+    protected function getCollectionUpdateRules($request): array
     {
-        return [];
-
-        if ($request->method() === 'GET') {
-            return [];
-        }
-
         return $this->getRequestResourcesForValidation($request)
             ->flatMap(function (Resource $resource, string $key) use ($request) {
                 return FieldCollection::make($resource->fields($request))
                     ->mapWithKeys(function (Field $field) use ($request, $key) {
                         return [
-                            $this->getValidationKeyByField($field, $key) => $field->rules
+                            $this->getValidationKeyByField($field, $key) => $field->getUpdateRules($request),
                         ];
                     });
             })
