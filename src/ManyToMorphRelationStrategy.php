@@ -59,6 +59,10 @@ class ManyToMorphRelationStrategy implements Strategy
 
             foreach ($modelsForDetach as $modelForDetach) {
                 $model->{$attribute}()->detach($modelForDetach);
+
+                if (! $this->field->attachable) {
+                    $modelForDetach->delete();
+                }
             }
 
             $resourceClassesByType = [];
