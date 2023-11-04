@@ -49,9 +49,9 @@
                 :key="fieldIndex"
                 :is="`form-${field.component}`"
                 :field="field"
-                :resource-name="resourceName"
-                :resource-id="resourceId"
                 :errors="errors"
+                :resource-id="resourceId"
+                :resource-name="resourceName"
             />
         </div>
     </div>
@@ -61,8 +61,43 @@
 import { ref, onMounted } from 'vue'
 
 const props = defineProps({
+    id: {
+        type: [String, Number],
+        default: null
+    },
+
+    type: {
+        type: [String, Number],
+        default: null
+    },
+
+    mode: {
+        type: String,
+        required: true
+    },
+
+    index: {
+        type: Number,
+        required: true
+    },
+
     fields: {
         type: Array,
+        required: true
+    },
+
+    errors: {
+        type: Object,
+        default: null
+    },
+
+    resourceId: {
+        type: [String, Number],
+        default: null
+    },
+
+    resourceName: {
+        type: String,
         required: true
     },
 
@@ -89,22 +124,7 @@ const props = defineProps({
     skipIfNoChanges: {
         type: Boolean,
         default: false
-    },
-
-    errors: {
-        type: Object,
-        default: null
-    },
-
-    resourceName: {
-        type: String,
-        required: true
-    },
-
-    resourceId: {
-        type: [String, Number],
-        default: null
-    },
+    }
 })
 
 const emits = defineEmits([
@@ -119,9 +139,47 @@ function toggleCollapse() {
     collapsed.value = !collapsed.value
 }
 
-function fillFormData(formData) {
+function fillAttributesToFormData(formData) {
     for (const field of (props.fields ?? [])) {
         field.fill(formData)
+    }
+}
+
+const originalAttributesFormData = new FormData()
+
+onMounted(function () {
+    fillAttributesToFormData(originalAttributesFormData)
+})
+
+function fill(nestedFormData) {
+    nestedFormData.withConcat(props.index, () => {
+        if (props.id) {
+            nestedFormData.append('id', props.id)
+        }
+
+        if (props.type) {
+            nestedFormData.append('type', props.type)
+        }
+
+        nestedFormData.append('mode', props.mode)
+
+        nestedFormData.withConcat('attributes', () => {
+            fillAttributes(nestedFormData)
+        })
+    })
+}
+
+function fillAttributes(formData) {
+    if (props.skipIfNoChanges) {
+        const currentAttributesFormData = new FormData()
+
+        fillAttributesToFormData(currentAttributesFormData)
+
+        if (! compareFormData(originalAttributesFormData, currentAttributesFormData)) {
+            copyFormData(currentAttributesFormData, formData)
+        }
+    } else {
+        fillAttributesToFormData(formData)
     }
 }
 
@@ -138,26 +196,6 @@ function compareFormData(source, target) {
 function copyFormData(source, target) {
     for (let [key, value] of source.entries()) {
         target.append(key, value)
-    }
-}
-
-const originalFormData = new FormData()
-
-onMounted(function () {
-    fillFormData(originalFormData)
-})
-
-function fill(formData) {
-    if (props.skipIfNoChanges) {
-        const currentFormData = new FormData()
-
-        fillFormData(currentFormData)
-
-        if (! compareFormData(originalFormData, currentFormData)) {
-            copyFormData(currentFormData, formData)
-        }
-    } else {
-        fillFormData(formData)
     }
 }
 
