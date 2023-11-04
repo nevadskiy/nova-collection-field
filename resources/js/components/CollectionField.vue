@@ -13,6 +13,7 @@
                     ref="itemComponents"
                     :id="item.id"
                     :mode="item.mode"
+                    :attribute="field.attribute"
                     :index="index"
                     :fields="item.fields"
                     :errors="errors"
