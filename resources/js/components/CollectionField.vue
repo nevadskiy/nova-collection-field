@@ -92,7 +92,7 @@ export default {
 
             const nestedFormData = NestedFormData.wrap(formData)
 
-            nestedFormData.withConcat(this.field.attribute, () => {
+            nestedFormData.withNesting(this.field.attribute, () => {
                 for (const itemComponent of this.$refs.itemComponents) {
                     itemComponent.fill(nestedFormData)
                 }

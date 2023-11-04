@@ -152,7 +152,7 @@ onMounted(function () {
 })
 
 function fill(nestedFormData) {
-    nestedFormData.withConcat(props.index, () => {
+    nestedFormData.withNesting(props.index, () => {
         if (props.id) {
             nestedFormData.append('id', props.id)
         }
@@ -163,7 +163,7 @@ function fill(nestedFormData) {
 
         nestedFormData.append('mode', props.mode)
 
-        nestedFormData.withConcat('attributes', () => {
+        nestedFormData.withNesting('attributes', () => {
             fillAttributes(nestedFormData)
         })
     })
