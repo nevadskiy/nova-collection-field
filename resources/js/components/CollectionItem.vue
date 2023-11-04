@@ -49,7 +49,7 @@
                 :key="fieldIndex"
                 :is="`form-${field.component}`"
                 :field="field"
-                :errors="itemErrors"
+                :errors="errors"
                 :resource-id="resourceId"
                 :resource-name="resourceName"
             />
@@ -58,9 +58,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import pickBy from "lodash/pickBy";
-import mapKeys from "lodash/mapKeys";
+import { ref, onMounted } from 'vue'
+
+// @todo use HandlesValidationErrors mixin and `viaParent` prop to display validation errors.
 
 const props = defineProps({
     id: {
@@ -139,20 +139,6 @@ const emits = defineEmits([
     'move-down',
     'remove'
 ])
-
-const itemErrors = computed(() => {
-    const path = `${props.attribute}.${props.index}.attributes.`
-
-    const errors = {}
-
-    for (const key in props.errors) {
-        if (key.startsWith(path)) {
-            errors[key.replace(path, '')] = props.errors[key];
-        }
-    }
-
-    return errors;
-})
 
 const collapsed = ref(props.collapsedByDefault)
 
