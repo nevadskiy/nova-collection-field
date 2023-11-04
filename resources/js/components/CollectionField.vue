@@ -14,15 +14,13 @@
                     :field="field"
                     :fields="item.fields"
                     :errors="errors"
-                    :resource-id="item.id"
                     :resource-name="field.resource.type"
-                    :index="index"
-                    :id="item.id"
-                    :mode="item.mode"
+                    :resource-id="item.id"
                     :title="item.singularLabel"
+                    :sortable="field.sortable"
                     :collapsable="field.collapsable"
                     :collapsed-by-default="field.collapsedByDefault"
-                    :sortable="field.sortable"
+                    :skip-if-no-changes="field.skipIfNoChanges"
                     @move-up="moveUpItem(index)"
                     @move-down="moveDownItem(index)"
                     @remove="removeItem(index)"
@@ -93,9 +91,19 @@ export default {
             const nestedFormData = NestedFormData.wrap(formData)
 
             nestedFormData.withConcat(this.field.attribute, () => {
-                for (const itemComponent of this.$refs.itemComponents) {
-                    itemComponent.fill(nestedFormData)
-                }
+                this.collection.forEach((item, index) => {
+                    nestedFormData.withConcat(index, () => {
+                        if (item.id) {
+                            nestedFormData.append('id', item.id)
+                        }
+
+                        nestedFormData.append('mode', item.mode)
+
+                        nestedFormData.withConcat('attributes', () => {
+                            this.$refs.itemComponents[index].fill(nestedFormData)
+                        })
+                    })
+                })
             })
         },
 

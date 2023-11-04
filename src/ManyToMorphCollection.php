@@ -19,6 +19,8 @@ class ManyToMorphCollection extends Field
 
     public bool $attachable = false;
 
+    public bool $skipIfNoChanges = false;
+
     public Strategy $strategy;
 
     public function __construct(string $name, string $attribute = null)
@@ -52,6 +54,13 @@ class ManyToMorphCollection extends Field
         return $this;
     }
 
+    public function skipIfNoChanges(bool $skipIfNoChanges = true): static
+    {
+        $this->skipIfNoChanges = $skipIfNoChanges;
+
+        return $this;
+    }
+
     protected function resolveAttribute($resource, $attribute)
     {
         return $this->strategy->get($resource, $attribute);
@@ -70,6 +79,7 @@ class ManyToMorphCollection extends Field
             'attachable' => $this->attachable,
             'collapsable' => $this->collapsable,
             'collapsedByDefault' => $this->collapsedByDefault,
+            'skipIfNoChanges' => $this->skipIfNoChanges,
         ]);
     }
 

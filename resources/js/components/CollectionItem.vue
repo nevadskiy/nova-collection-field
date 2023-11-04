@@ -13,7 +13,7 @@
             </button>
 
             <h4 class="ml-3 font-bold mr-auto">
-                #{{ index + 1 }} {{ title }}
+                {{ title }}
             </h4>
 
             <IconButton
@@ -45,36 +45,67 @@
 
         <div v-show="!collapsed" class="grid grid-cols-full divide-y divide-gray-100 dark:divide-gray-700">
             <component
-                v-for="(field, index) in fields"
-                :key="index"
+                v-for="(field, fieldIndex) in fields"
+                :key="fieldIndex"
                 :is="`form-${field.component}`"
                 :field="field"
-                :errors="errors"
-                :resource-id="resourceId"
                 :resource-name="resourceName"
+                :resource-id="resourceId"
+                :errors="errors"
             />
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
-const props = defineProps([
-    'fields',
-    'errors',
-    'resourceName',
-    'resourceId',
-    'path',
-    'index',
-    'id',
-    'type',
-    'mode',
-    'title',
-    'collapsable',
-    'collapsedByDefault',
-    'sortable',
-])
+const props = defineProps({
+    fields: {
+        type: Array,
+        required: true
+    },
+
+    title: {
+        type: String,
+        required: true
+    },
+
+    collapsable: {
+        type: Boolean,
+        default: false
+    },
+
+    collapsedByDefault: {
+        type: Boolean,
+        default: false
+    },
+
+    sortable: {
+        type: Boolean,
+        default: false
+    },
+
+    skipIfNoChanges: {
+        type: Boolean,
+        default: false
+    },
+
+    errors: {
+        type: Object,
+        default: null
+    },
+
+    resourceName: {
+        type: String,
+        required: true
+    },
+
+    resourceId: {
+        type: [String, Number],
+        default: null
+    },
+})
 
 const emits = defineEmits([
     'move-up',
@@ -84,28 +115,50 @@ const emits = defineEmits([
 
 const collapsed = ref(props.collapsedByDefault)
 
-const toggleCollapse = function () {
+function toggleCollapse() {
     collapsed.value = !collapsed.value
 }
 
-const fill = function (nestedFormData) {
-    nestedFormData.withConcat(props.index, () => {
-        if (props.id) {
-            nestedFormData.append('id', props.id)
+function fillFormData(formData) {
+    for (const field of (props.fields ?? [])) {
+        field.fill(formData)
+    }
+}
+
+function compareFormData(source, target) {
+    for (let [key, value] of target.entries()) {
+        if (source.get(key) !== value) {
+            return false
         }
+    }
 
-        if (props.type) {
-            nestedFormData.append('type', props.type)
+    return true
+}
+
+function copyFormData(source, target) {
+    for (let [key, value] of source.entries()) {
+        target.append(key, value)
+    }
+}
+
+const originalFormData = new FormData()
+
+onMounted(function () {
+    fillFormData(originalFormData)
+})
+
+function fill(formData) {
+    if (props.skipIfNoChanges) {
+        const currentFormData = new FormData()
+
+        fillFormData(currentFormData)
+
+        if (! compareFormData(originalFormData, currentFormData)) {
+            copyFormData(currentFormData, formData)
         }
-
-        nestedFormData.append('mode', props.mode)
-
-        nestedFormData.withConcat('attributes', () => {
-            for (const field of (props.fields ?? [])) {
-                field.fill(nestedFormData)
-            }
-        })
-    })
+    } else {
+        fillFormData(formData)
+    }
 }
 
 defineExpose({

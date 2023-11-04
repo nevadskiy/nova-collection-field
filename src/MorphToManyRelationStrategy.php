@@ -67,7 +67,12 @@ class MorphToManyRelationStrategy implements Strategy
                 foreach ($requestCollection as $requestResource) {
                     $collectionDictionary = $resourceClass::newModel()
                         ->newQuery()
-                        ->findMany(collect($requestCollection)->map(fn (array $resource) => $requestResource['id'])->filter())
+                        ->findMany(
+                            collect($requestCollection)
+                                ->filter(fn (array $resource) => isset($requestResource['id']))
+                                ->map(fn (array $resource) => $requestResource['id'])
+                                ->values()
+                        )
                         ->getDictionary();
 
                     if ($requestResource['mode'] === 'create') {
@@ -75,7 +80,9 @@ class MorphToManyRelationStrategy implements Strategy
 
                         $syncPayload[$modelForCreate->getKey()] = $this->getPivotAttributes($requestResource);
                     } else if ($requestResource['mode'] === 'update' || $requestResource['mode'] === 'attach') {
-                        $this->updateResourceModel($collectionDictionary[$requestResource['id']], $resourceClass, $requestResource['attributes']);
+                        if (isset($requestResource['attributes'])) {
+                            $this->updateResourceModel($collectionDictionary[$requestResource['id']], $resourceClass, $requestResource['attributes']);
+                        }
 
                         $syncPayload[$requestResource['id']] = $this->getPivotAttributes($requestResource);
                     }

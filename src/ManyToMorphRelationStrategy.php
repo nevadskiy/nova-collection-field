@@ -75,13 +75,17 @@ class ManyToMorphRelationStrategy implements Strategy
                 } else if ($requestResource['mode'] === 'attach') {
                     $modelForAttach = $resourceClassesByType[$requestResource['type']]::newModel()->newQuery()->findOrFail($requestResource['id']);
 
-                    $this->updateResourceModel($modelForAttach, $resourceClassesByType[$requestResource['type']], $requestResource['attributes']);
+                    if (isset($requestResource['attributes'])) {
+                        $this->updateResourceModel($modelForAttach, $resourceClassesByType[$requestResource['type']], $requestResource['attributes']);
+                    }
 
                     $model->{$attribute}()->attach($modelForAttach, $this->getPivotAttributes($index));
                 } else if ($requestResource['mode'] === 'update') {
                     $modelForUpdate = $collectionDictionary[$this->getDictionaryKey($requestResource['id'], $requestResource['type'])];
 
-                    $this->updateResourceModel($modelForUpdate, $resourceClassesByType[$requestResource['type']], $requestResource['attributes']);
+                    if (isset($requestResource['attributes'])) {
+                        $this->updateResourceModel($modelForUpdate, $resourceClassesByType[$requestResource['type']], $requestResource['attributes']);
+                    }
 
                     $model->{$attribute}()->updateExistingPivot($modelForUpdate, $this->getPivotAttributes($index));
                 }

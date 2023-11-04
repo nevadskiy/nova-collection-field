@@ -87,7 +87,7 @@ class HasManyRelationStrategy implements Strategy
         $modelsForDelete = [];
 
         $requestCollectionDictionary = collect($requestCollection)
-            ->filter(fn($resource) => $resource['id'])
+            ->filter(fn ($resource) => isset($resource['id']))
             ->keyBy('id');
 
         foreach ($collectionDictionary as $collectionModel) {
