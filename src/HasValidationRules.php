@@ -29,6 +29,8 @@ trait HasValidationRules
     {
         return $this->getRequestResourcesForValidation($request)
             ->flatMap(function (Resource $resource, string $key) use ($request) {
+                // @todo use NestedNovaRequest (same as client side) for specifying correct nested validation key.
+
                 return FieldCollection::make($resource->fields($request))
                     ->mapWithKeys(function (Field $field) use ($request, $key) {
                         return [
