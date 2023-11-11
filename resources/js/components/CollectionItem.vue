@@ -49,7 +49,7 @@
                 :key="fieldIndex"
                 :is="`form-${field.component}`"
                 :field="field"
-                :errors="errors"
+                :errors="itemErrors"
                 :resource-id="resourceId"
                 :resource-name="resourceName"
             />
@@ -58,7 +58,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { Errors } from 'form-backend-validation'
+import { ref, onMounted, computed } from 'vue'
 
 // @todo use HandlesValidationErrors mixin and `viaParent` prop to display validation errors.
 
@@ -141,6 +142,20 @@ const emits = defineEmits([
 ])
 
 const collapsed = ref(props.collapsedByDefault)
+
+const itemErrors = computed(() => {
+    const itemErrors = {}
+
+    for (const key in props.errors.all()) {
+        console.log(key)
+
+        if (key.startsWith(`${props.attribute}.${props.index}.attributes.`)) {
+            itemErrors[key.replace(`${props.attribute}.${props.index}.attributes.`, '')] = props.errors.get(key)
+        }
+    }
+
+    return new Errors(itemErrors)
+})
 
 function toggleCollapse() {
     collapsed.value = !collapsed.value
