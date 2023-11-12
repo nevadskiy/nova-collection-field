@@ -81,7 +81,7 @@ class MorphToManyCollection extends Field
             $resourcesByType[$resourceClass::uriKey()] = new $resourceClass($resourceClass::newModel());
         }
 
-        return collect($request->input($this->validationKey()))
+        return collect($request->input("{$this->getNestedValidationKey($request)}{$this->validationKey()}"))
             ->filter(function (array $requestResource) {
                 return isset($requestResource['attributes']);
             })

@@ -4,7 +4,6 @@ namespace Nevadskiy\Nova\Collection;
 
 use Illuminate\Support\Collection;
 use Laravel\Nova\Fields\Field;
-use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Resource;
 
@@ -17,46 +16,71 @@ trait HasValidationRules
 
     public function getCreationRules(NovaRequest $request): array
     {
-        return array_merge_recursive(parent::getCreationRules($request), $this->getCollectionUpdateRules($request));
+        return $this->getRequestResourcesForValidation($request)
+            ->flatMap(function (Resource $resource, string $key) use ($request) {
+                return $this->withNestedValidationKey($request, $key, function () use ($request, $resource) {
+                    $rules = [];
+
+                    foreach ($resource->fields($request) as $field) {
+                        if ($field instanceof HasNestedValidationRules) {
+                            foreach ($field->getCreationRules($request) as $nestedField => $nestedFieldRules) {
+                                $rules[$nestedField] = $nestedFieldRules;
+                            }
+                        } else {
+                            $nestedValidationKey = $this->getNestedValidationKey($request);
+
+                            foreach ($field->getCreationRules($request) as $fieldAttribute => $fieldAttributeRules) {
+                                $rules[$nestedValidationKey . $fieldAttribute] = $fieldAttributeRules;
+                            }
+                        }
+                    }
+
+                    return $rules;
+                });
+            })
+            ->all();
     }
 
     public function getUpdateRules(NovaRequest $request): array
     {
-        return array_merge_recursive(parent::getUpdateRules($request), $this->getCollectionUpdateRules($request));
-    }
-
-    protected function getCollectionCreationRules($request): array
-    {
-        return $this->getRequestResourcesForValidation($request)
+        $rules = $this->getRequestResourcesForValidation($request)
             ->flatMap(function (Resource $resource, string $key) use ($request) {
-                // @todo use NestedNovaRequest (same as client side) for specifying correct nested validation key.
+                return $this->withNestedValidationKey($request, $key, function () use ($request, $resource) {
+                    $rules = [];
 
-                return FieldCollection::make($resource->fields($request))
-                    ->mapWithKeys(function (Field $field) use ($request, $key) {
-                        return [
-                            $this->getValidationKeyByField($field, $key) => $field->getCreationRules($request)
-                        ];
-                    });
+                    foreach ($resource->fields($request) as $field) {
+                        $nestedValidationKey = $this->getNestedValidationKey($request);
+
+                        foreach ($field->getUpdateRules($request) as $fieldAttribute => $fieldAttributeRules) {
+                            $rules[$field instanceof MorphToManyCollection ? $fieldAttribute : $nestedValidationKey . $fieldAttribute] = $fieldAttributeRules;
+                        }
+                    }
+
+                    return $rules;
+                });
             })
             ->all();
+
+        app('log')->info('rules', $rules);
+
+        return $rules;
     }
 
-    protected function getCollectionUpdateRules($request): array
+    protected function withNestedValidationKey(NovaRequest $request, string $key, callable $callback): mixed
     {
-        return $this->getRequestResourcesForValidation($request)
-            ->flatMap(function (Resource $resource, string $key) use ($request) {
-                return FieldCollection::make($resource->fields($request))
-                    ->mapWithKeys(function (Field $field) use ($request, $key) {
-                        return [
-                            $this->getValidationKeyByField($field, $key) => $field->getUpdateRules($request),
-                        ];
-                    });
-            })
-            ->all();
+        $original = $request->attributes->get('collection.validation.namespace', '');
+
+        $request->attributes->set('collection.validation.namespace', $original . "{$this->attribute}.{$key}.attributes.");
+
+        $result = $callback();
+
+        $request->attributes->set('collection.validation.namespace', $original);
+
+        return $result;
     }
 
-    protected function getValidationKeyByField(Field $field, string $key): string
+    protected function getNestedValidationKey(NovaRequest $request): string
     {
-        return "{$this->validationKey()}.{$key}.attributes.{$field->validationKey()}";
+        return $request->attributes->get('collection.validation.namespace');
     }
 }
