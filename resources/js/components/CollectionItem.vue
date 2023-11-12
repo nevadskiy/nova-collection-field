@@ -61,8 +61,6 @@
 import { Errors } from 'form-backend-validation'
 import { ref, onMounted, computed } from 'vue'
 
-// @todo use HandlesValidationErrors mixin and `viaParent` prop to display validation errors.
-
 const props = defineProps({
     id: {
         type: [String, Number],
@@ -143,18 +141,18 @@ const emits = defineEmits([
 
 const collapsed = ref(props.collapsedByDefault)
 
+// @todo fix case for wildcard index attributes (components.*.attributes.heading)
+// @todo format messages
 const itemErrors = computed(() => {
-    const itemErrors = {}
+    const errors = {}
 
     for (const key in props.errors.all()) {
-        console.log(key)
-
         if (key.startsWith(`${props.attribute}.${props.index}.attributes.`)) {
-            itemErrors[key.replace(`${props.attribute}.${props.index}.attributes.`, '')] = props.errors.get(key)
+            errors[key.replace(`${props.attribute}.${props.index}.attributes.`, '')] = props.errors.get(key)
         }
     }
 
-    return new Errors(itemErrors)
+    return new Errors(errors)
 })
 
 function toggleCollapse() {
