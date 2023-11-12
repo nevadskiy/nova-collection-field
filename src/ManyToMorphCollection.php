@@ -73,7 +73,7 @@ class ManyToMorphCollection extends Field
         return $this->strategy->set($request, $requestAttribute, $model, $attribute);
     }
 
-    protected function getRequestResourcesForValidation(NovaRequest $request): Collection
+    protected function getRequestResourcesForValidation(NovaRequest $request, string $viaAttribute = ''): Collection
     {
         $resourcesByType = [];
 
@@ -81,7 +81,7 @@ class ManyToMorphCollection extends Field
             $resourcesByType[$resourceClass::uriKey()] = new $resourceClass($resourceClass::newModel());
         }
 
-        return collect($request->input($this->validationKey()))
+        return collect($request->input("{$viaAttribute}{$this->validationKey()}"))
             ->filter(function (array $requestResource) {
                 return isset($requestResource['attributes']);
             })

@@ -12,75 +12,75 @@ use Laravel\Nova\Resource;
  */
 trait HasValidationRules
 {
-    abstract protected function getRequestResourcesForValidation(NovaRequest $request): Collection;
+    abstract protected function getRequestResourcesForValidation(NovaRequest $request, string $viaAttribute = ''): Collection;
 
     public function getCreationRules(NovaRequest $request): array
     {
-        return $this->getRequestResourcesForValidation($request)
-            ->flatMap(function (Resource $resource, string $key) use ($request) {
-                return $this->withNestedValidationKey($request, $key, function () use ($request, $resource) {
-                    $rules = [];
+        return $this->getNestedCreationRules($request);
+    }
 
-                    foreach ($resource->fields($request) as $field) {
-                        if ($field instanceof HasNestedValidationRules) {
-                            foreach ($field->getCreationRules($request) as $nestedField => $nestedFieldRules) {
-                                $rules[$nestedField] = $nestedFieldRules;
-                            }
-                        } else {
-                            $nestedValidationKey = $this->getNestedValidationKey($request);
+    protected function getNestedCreationRules(NovaRequest $request, string $viaAttribute = ''): array
+    {
+        return $this->getRequestResourcesForValidation($request, $viaAttribute)
+            ->flatMap(function (Resource $resource, string $key) use ($request, $viaAttribute) {
+                $rules = [];
 
-                            foreach ($field->getCreationRules($request) as $fieldAttribute => $fieldAttributeRules) {
-                                $rules[$nestedValidationKey . $fieldAttribute] = $fieldAttributeRules;
-                            }
+                $viaAttribute = $this->getNestedValidationKey($viaAttribute, $key);
+
+                foreach ($resource->fields($request) as $field) {
+                    if (method_exists($field, 'getNestedCreationRules')) {
+                        foreach ($field->getNestedCreationRules($request, $viaAttribute) as $fieldAttribute => $fieldRules) {
+                            $rules[$fieldAttribute] = $fieldRules;
+                        }
+                    } else {
+                        foreach ($field->getCreationRules($request) as $fieldAttribute => $fieldRules) {
+                            $rules[$viaAttribute . $fieldAttribute] = $fieldRules;
                         }
                     }
+                }
 
-                    return $rules;
-                });
+                return $rules;
             })
             ->all();
     }
 
     public function getUpdateRules(NovaRequest $request): array
     {
-        $rules = $this->getRequestResourcesForValidation($request)
-            ->flatMap(function (Resource $resource, string $key) use ($request) {
-                return $this->withNestedValidationKey($request, $key, function () use ($request, $resource) {
-                    $rules = [];
+        return $this->getNestedUpdateRules($request);
+    }
 
-                    foreach ($resource->fields($request) as $field) {
-                        $nestedValidationKey = $this->getNestedValidationKey($request);
+    public function getNestedUpdateRules(NovaRequest $request, string $viaAttribute = ''): array
+    {
+        return $this->getRequestResourcesForValidation($request, $viaAttribute)
+            ->flatMap(function (Resource $resource, string $key) use ($request, $viaAttribute) {
+                $rules = [];
 
-                        foreach ($field->getUpdateRules($request) as $fieldAttribute => $fieldAttributeRules) {
-                            $rules[$field instanceof MorphToManyCollection ? $fieldAttribute : $nestedValidationKey . $fieldAttribute] = $fieldAttributeRules;
+                $viaAttribute = $this->getNestedValidationKey($viaAttribute, $key);
+
+                foreach ($resource->fields($request) as $field) {
+                    if (method_exists($field, 'getNestedUpdateRules')) {
+                        foreach ($field->getNestedUpdateRules($request, $viaAttribute) as $fieldAttribute => $fieldRules) {
+                            $rules[$fieldAttribute] = $fieldRules;
+                        }
+                    } else {
+                        foreach ($field->getUpdateRules($request) as $fieldAttribute => $fieldRules) {
+                            $rules[$viaAttribute . $fieldAttribute] = $fieldRules;
                         }
                     }
+                }
 
-                    return $rules;
-                });
+                return $rules;
             })
             ->all();
-
-        app('log')->info('rules', $rules);
-
-        return $rules;
     }
 
-    protected function withNestedValidationKey(NovaRequest $request, string $key, callable $callback): mixed
+    protected function getNestedValidationKey(string $viaAttribute, string $key): string
     {
-        $original = $request->attributes->get('collection.validation.namespace', '');
-
-        $request->attributes->set('collection.validation.namespace', $original . "{$this->attribute}.{$key}.attributes.");
-
-        $result = $callback();
-
-        $request->attributes->set('collection.validation.namespace', $original);
-
-        return $result;
+        return "{$viaAttribute}{$this->validationKey()}.{$key}.attributes.";
     }
 
-    protected function getNestedValidationKey(NovaRequest $request): string
+    public function isRequired(NovaRequest $request): bool
     {
-        return $request->attributes->get('collection.validation.namespace');
+        return false;
     }
 }

@@ -49,7 +49,7 @@ class HasManyCollection extends Field
         return $this->strategy->set($request, $requestAttribute, $model, $attribute);
     }
 
-    protected function getRequestResourcesForValidation(NovaRequest $request): Collection
+    protected function getRequestResourcesForValidation(NovaRequest $request, string $viaAttribute = ''): Collection
     {
         return collect([
             '*' => new $this->resourceClass($this->resourceClass::newModel())
