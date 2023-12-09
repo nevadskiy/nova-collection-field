@@ -2,6 +2,7 @@
 
 namespace Nevadskiy\Nova\Collection;
 
+use Illuminate\Support\Collection;
 use Laravel\Nova\Fields\Collapsable;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -10,6 +11,7 @@ use Laravel\Nova\Resource;
 class MorphToManyCollection extends Field
 {
     use Collapsable;
+    use HasValidationRules;
 
     public $component = 'morph-collection-field';
 
@@ -69,6 +71,23 @@ class MorphToManyCollection extends Field
     protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute)
     {
         return $this->strategy->set($request, $requestAttribute, $model, $attribute);
+    }
+
+    protected function getRequestResourcesForValidation(NovaRequest $request, string $viaAttribute = ''): Collection
+    {
+        $resourcesByType = [];
+
+        foreach ($this->resources as $resourceClass) {
+            $resourcesByType[$resourceClass::uriKey()] = new $resourceClass($resourceClass::newModel());
+        }
+
+        return collect($request->input("{$viaAttribute}{$this->validationKey()}"))
+            ->filter(function (array $requestResource) {
+                return isset($requestResource['attributes']);
+            })
+            ->map(function (array $requestResource) use ($resourcesByType) {
+                return $resourcesByType[$requestResource['type']];
+            });
     }
 
     public function jsonSerialize(): array

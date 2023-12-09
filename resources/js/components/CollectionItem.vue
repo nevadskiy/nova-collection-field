@@ -49,7 +49,7 @@
                 :key="fieldIndex"
                 :is="`form-${field.component}`"
                 :field="field"
-                :errors="errors"
+                :errors="itemErrors"
                 :resource-id="resourceId"
                 :resource-name="resourceName"
             />
@@ -58,7 +58,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { Errors } from 'form-backend-validation'
+import { ref, onMounted, computed } from 'vue'
 
 const props = defineProps({
     id: {
@@ -72,6 +73,11 @@ const props = defineProps({
     },
 
     mode: {
+        type: String,
+        required: true
+    },
+
+    attribute: {
         type: String,
         required: true
     },
@@ -135,6 +141,20 @@ const emits = defineEmits([
 
 const collapsed = ref(props.collapsedByDefault)
 
+// @todo fix case for wildcard index attributes (components.*.attributes.heading)
+// @todo format messages
+const itemErrors = computed(() => {
+    const errors = {}
+
+    for (const key in props.errors.all()) {
+        if (key.startsWith(`${props.attribute}.${props.index}.attributes.`)) {
+            errors[key.replace(`${props.attribute}.${props.index}.attributes.`, '')] = props.errors.get(key)
+        }
+    }
+
+    return new Errors(errors)
+})
+
 function toggleCollapse() {
     collapsed.value = !collapsed.value
 }
@@ -152,7 +172,7 @@ onMounted(function () {
 })
 
 function fill(nestedFormData) {
-    nestedFormData.withConcat(props.index, () => {
+    nestedFormData.withNesting(props.index, () => {
         if (props.id) {
             nestedFormData.append('id', props.id)
         }
@@ -163,7 +183,7 @@ function fill(nestedFormData) {
 
         nestedFormData.append('mode', props.mode)
 
-        nestedFormData.withConcat('attributes', () => {
+        nestedFormData.withNesting('attributes', () => {
             fillAttributes(nestedFormData)
         })
     })

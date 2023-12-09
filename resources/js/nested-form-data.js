@@ -12,10 +12,10 @@ export class NestedFormData {
         this.path = ''
     }
 
-    withConcat(attribute, callback) {
+    withNesting(attribute, callback) {
         const original = this.path
 
-        this.path = this.#concat(attribute)
+        this.path = this.#nest(attribute)
 
         callback()
 
@@ -23,12 +23,12 @@ export class NestedFormData {
     }
 
     append(attribute, value) {
-        const path = this.#concat(attribute)
+        const path = this.#nest(attribute)
 
         this.formData.append(this.#formatPath(path), value)
     }
 
-    #concat(attribute) {
+    #nest(attribute) {
         attribute = String(attribute).replace(/\[(\w+)\]/g, '.$1')
 
         return this.path ?

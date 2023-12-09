@@ -2,12 +2,14 @@
 
 namespace Nevadskiy\Nova\Collection;
 
+use Illuminate\Support\Collection;
 use Laravel\Nova\Fields\Collapsable;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class HasManyCollection extends Field
 {
+    use HasValidationRules;
     use Collapsable;
 
     public $component = 'collection-field';
@@ -45,6 +47,13 @@ class HasManyCollection extends Field
     protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute)
     {
         return $this->strategy->set($request, $requestAttribute, $model, $attribute);
+    }
+
+    protected function getRequestResourcesForValidation(NovaRequest $request, string $viaAttribute = ''): Collection
+    {
+        return collect([
+            '*' => new $this->resourceClass($this->resourceClass::newModel())
+        ]);
     }
 
     public function jsonSerialize(): array

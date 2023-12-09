@@ -13,6 +13,7 @@
                     ref="itemComponents"
                     :id="item.id"
                     :mode="item.mode"
+                    :attribute="field.attribute"
                     :index="index"
                     :fields="item.fields"
                     :errors="errors"
@@ -92,7 +93,7 @@ export default {
 
             const nestedFormData = NestedFormData.wrap(formData)
 
-            nestedFormData.withConcat(this.field.attribute, () => {
+            nestedFormData.withNesting(this.field.attribute, () => {
                 for (const itemComponent of this.$refs.itemComponents) {
                     itemComponent.fill(nestedFormData)
                 }
