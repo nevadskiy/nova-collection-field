@@ -27,7 +27,7 @@ trait HasValidationRules
 
                 $viaAttribute = $this->getNestedValidationKey($viaAttribute, $key);
 
-                foreach ($resource->fields($request) as $field) {
+                foreach ($resource->creationFields($request) as $field) {
                     if (method_exists($field, 'getNestedCreationRules')) {
                         foreach ($field->getNestedCreationRules($request, $viaAttribute) as $fieldAttribute => $fieldRules) {
                             $rules[$fieldAttribute] = $fieldRules;
@@ -57,7 +57,7 @@ trait HasValidationRules
 
                 $viaAttribute = $this->getNestedValidationKey($viaAttribute, $key);
 
-                foreach ($resource->fields($request) as $field) {
+                foreach ($resource->updateFields($request) as $field) {
                     if (method_exists($field, 'getNestedUpdateRules')) {
                         foreach ($field->getNestedUpdateRules($request, $viaAttribute) as $fieldAttribute => $fieldRules) {
                             $rules[$fieldAttribute] = $fieldRules;
